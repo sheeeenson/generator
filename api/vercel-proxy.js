@@ -15,6 +15,11 @@ export default async function (request, response) {
     return response.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // Проверка наличия API-ключа
+  if (!API_KEY) {
+    return response.status(500).json({ error: 'VERCEL_GEMINI_API_KEY is not set in environment variables.' });
+  }
+
   try {
     const { userPrompt, systemPrompt } = request.body;
 
@@ -31,7 +36,9 @@ export default async function (request, response) {
     });
 
     if (!apiResponse.ok) {
-      return response.status(apiResponse.status).json({ error: `API error: ${apiResponse.statusText}` });
+      // Возвращаем полный текст ошибки от API
+      const errorText = await apiResponse.text();
+      return response.status(apiResponse.status).json({ error: `API error: ${apiResponse.statusText}. Details: ${errorText}` });
     }
 
     const result = await apiResponse.json();
