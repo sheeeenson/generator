@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creative Kitchen Generator</title>
+  <style>
+    /* Базовые стили для мобильных устройств (mobile-first approach) */
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      padding: 10px; 
+      background: #f9f9f9; 
+      margin: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 10px;
+    }
+
+    .block { 
+      background: #fff; 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+      border: 1px solid #e0e0e0; 
+    }
+    h2 { 
+      font-size: 20px; 
+      color: #222; 
+      margin-bottom: 12px; 
+    }
+    label { 
+      display: block; 
+      margin-top: 10px; 
+      font-weight: 600; 
+      color: #333; 
+    }
+    input, select, textarea, button { 
+      width: 100%; 
+      padding: 10px; 
+      margin-top: 5px; 
+      border-radius: 6px; 
+      border: 1px solid #ccc; 
+      font-size: 14px; 
+      background: #fff; 
+      box-sizing: border-box; 
+    }
+    .btn { 
+      background: #222; 
+      color: #fff; 
+      border: none; 
+      cursor: pointer; 
+      font-weight: 600; 
+      position: relative; 
+    }
+    .btn:hover { 
+      background: #444; 
+    }
+    .btn:disabled { 
+      background: #999; 
+      cursor: not-allowed; 
+    }
+    
+    .generate-btn {
+      background: #fff;
+      color: #222;
+      border: 1px solid #222;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Прогресс-бар */
+    .generate-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.1);
+      transition: width 0.3s ease-in-out;
+      z-index: 1;
+    }
+
+    .generate-btn.loading {
+      cursor: wait;
+    }
+    
+    .generate-btn.loading::after {
+      width: 100%;
+      animation: progress 2s infinite;
+    }
+
+    @keyframes progress {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
+
+    .generate-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .generate-btn:disabled {
+      background: #f0f0f0;
+      border: 1px solid #999;
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    .save-btn {
+      background: #f5f5dc; 
+      color: #222;
+      border: 1px solid #222;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px; 
+    }
+    .save-btn:hover {
+      background: #e0d9b8;
+    }
+
+    .clear-btn { 
+      background: #222; 
+      color: #fff; 
+      border: none;
+      margin-top: 15px; 
+    }
+    .clear-btn:hover { 
+      background: #444; 
+    }
+
+    .case-buttons { 
+      display: flex; 
+      gap: 10px; 
+      margin-top: 5px; 
+      flex-wrap: wrap; 
+    }
+    .case-buttons button { 
+      flex: 1; 
+      background: #222; 
+      color: #fff; 
+      min-width: 100px;
+    }
+    .case-buttons button.active { 
+      background: #28a745; 
+    }
+    .selected-items { 
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: wrap; 
+      margin-top: 10px; 
+    }
+    .selected-item-btn { 
+      background: #eee; 
+      color: #333; 
+      padding: 6px 12px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      border: none; 
+    }
+    .selected-item-btn:hover { 
+      background: #ddd; 
+    }
+    
+    textarea { 
+      resize: vertical; 
+      margin-top: 15px; 
+    }
+    .status-message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    
+    /* Медиа-запросы для планшетов */
+    @media (min-width: 600px) {
+      body {
+        padding: 20px;
+      }
+      .container {
+        padding: 0 20px;
+      }
+      .block {
+        padding: 30px;
+      }
+    }
+
+    /* Медиа-запросы для настольных компьютеров */
+    @media (min-width: 900px) {
+      .container {
+        padding: 0;
+      }
+      h2 {
+        font-size: 24px;
+      }
+      label {
+        font-size: 16px;
+      }
+      input, select, textarea, button {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Блок выбора ниши -->
+    <div class="block">
+      <h2>Выбор ниши</h2>
+      <label for="nicheSelect">Выберите нишу:</label>
+      <select id="nicheSelect" onchange="addSelectedNiche(this)">
+        <option value="">-- Выберите нишу --</option>
+      </select>
+      <div id="selectedNiches" class="selected-items"></div>
+      <label for="customNicheInput">Или введите название своей ниши:</label>
+      <input type="text" id="customNicheInput" placeholder="Введите свою нишу...">
+      <button class="btn" onclick="addCustomNicheInput()">Добавить нишу</button>
+      <label for="customNicheURL">Или вставьте сайт/соцсеть для анализа:</label>
+      <input type="text" id="customNicheURL" placeholder="URL бизнеса или соцсети...">
+      <button class="btn" onclick="confirmCustomNicheURL()">Подтвердить URL/ссылку</button>
+    </div>
+
+    <!-- Блок генерации сегментов -->
+    <div class="block">
+      <h2>Генерация сегментов ЦА</h2>
+      <label>Кликните по сегменту, чтобы добавить его:</label>
+      <div id="segmentsList" class="selected-items"></div>
+      <button id="generateSegmentsBtn" class="generate-btn" onclick="generateSegments()">Сгенерировать сегменты</button>
+      <label for="customSegment" style="margin-top:20px;">Или добавьте свой сегмент:</label>
+      <input type="text" id="customSegment" placeholder="Добавьте свой сегмент" style="margin-top:10px;"/>
+      <button class="btn" onclick="addCustomSegment()">Добавить сегмент</button>
+      <div id="selectedSegments" class="selected-items"></div>
+
+      <hr style="margin-top: 20px; border: 0; border-top: 1px solid #ccc;">
+      
+      <label style="margin-top:20px;">Получить подробный отчет по сегментам:</label>
+      <button id="generateDetailedReportBtn" class="generate-btn" onclick="generateDetailedReport()">Сгенерировать подробный отчет</button>
+      <textarea id="detailedSegmentsOutput" rows="10" placeholder="Здесь будет подробный отчет по сегментам"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('detailedSegmentsOutput')">Скопировать</button>
+    </div>
+    
+    <!-- Новый блок: Боли и фрустрации -->
+    <div class="block">
+      <h2>Боли и фрустрации</h2>
+      <label>Кликните по боли, чтобы добавить её:</label>
+      <div id="painsList" class="selected-items"></div>
+      <button id="generatePainsBtn" class="generate-btn" onclick="generatePains()">Сгенерировать боли</button>
+      <label for="customPain" style="margin-top:20px;">Или добавьте свою боль:</label>
+      <input type="text" id="customPain" placeholder="Добавьте свою боль" style="margin-top:10px;"/>
+      <button class="btn" onclick="addCustomPain()">Добавить боль</button>
+      <div id="selectedPains" class="selected-items"></div>
+    </div>
+
+    <!-- Блок генерации кейсов -->
+    <div class="block">
+      <h2>Генерация кейсов</h2>
+      <label>Выберите тип кейса:</label>
+      <div class="case-buttons" id="caseTypes">
+        <button class="btn" onclick="toggleCaseType(this, 'Обычные')">Обычные</button>
+        <button class="btn" onclick="toggleCaseType(this, 'Нестандартные')">Нестандартные</button>
+        <button class="btn" onclick="toggleCaseType(this, 'Абсурдные')">Абсурдные</button>
+      </div>
+      <button id="generateCasesBtn" class="generate-btn" onclick="generateCases()">Сгенерировать кейсы</button>
+      <textarea id="caseOutput" rows="6" placeholder="Здесь будет результат генерации"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('caseOutput')">Скопировать</button>
+    </div>
+
+    <!-- Блок генерации воронок AIDA -->
+    <div class="block">
+      <h2>Генерация воронок (AIDA)</h2>
+      <button id="generateFunnelsBtn" class="generate-btn" onclick="generateFunnels()">Сгенерировать воронку</button>
+      <textarea id="funnelOutput" rows="6" placeholder="Здесь будет результат генерации"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('funnelOutput')">Скопировать</button>
+    </div>
+
+    <!-- Блок лид-магнитов -->
+    <div class="block">
+      <h2>Лид-магниты</h2>
+      <label for="leadTitle">Название кликбейтного лид-магнита:</label>
+      <input type="text" id="leadTitle" placeholder="Придумайте кликбейтное название...">
+      <label>Выберите формат лид-магнита:</label>
+      <div class="case-buttons" id="leadTypes">
+        <button class="btn" onclick="toggleLeadType(this, 'гайд')">Гайд</button>
+        <button class="btn" onclick="toggleLeadType(this, 'чек-лист')">Чек-лист</button>
+        <button class="btn" onclick="toggleLeadType(this, 'мини-курс')">Мини-курс</button>
+        <button class="btn" onclick="toggleLeadType(this, 'видео')">Видео</button>
+        <button class="btn" onclick="toggleLeadType(this, 'подкаст')">Подкаст</button>
+      </div>
+      <button id="generateLeadMagnetsBtn" class="generate-btn" onclick="generateLeadMagnets()">Сгенерировать лид-магнит</button>
+      <textarea id="leadOutput" rows="6" placeholder="Здесь будет результат генерации"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('leadOutput')">Скопировать</button>
+    </div>
+
+    <!-- Кнопка очистить всё -->
+    <button class="clear-btn" onclick="clearAllData()">Очистить всё</button>
+    <div id="status-message" class="status-message"></div>
+  </div>
+
+  <script>
+    const niches = [
+      {category: 'Хорека', businesses: ["Рестораны","Кафе","Бары","Кофейни","Пиццерии","Фастфуд","Столовые","Фудтраки","Веганские/вегетарианские кафе","Доставка еды","Кондитерские","Кейтеринг","Суши-бары","Бранчи","Fine dining","Кулинарные мастер-классы"]},
+      {category: 'Красота и здоровье', businesses: ["Парикмахерские","Барбершопы","Салоны маникюра","Салоны красоты","СПА-салоны","Косметологические клиники","Фитнес-клубы","Йога-студии","Массажные салоны","Диетологи","Психотерапевты","Стоматология","Медицинские клиники","Онлайн-тренировки","Wellness-retreats","Натуральные БАДы"]},
+      {category: 'Образование', businesses: ["Школы","Детские сады","Онлайн-курсы","Языковые школы","Университеты","Учебные центры","Тренинговые компании","Репетиторы","IT-академии","STEM-курсы","Корпоративное обучение"]},
+      {category: 'Недвижимость', businesses: ["Агентства недвижимости","Застройщики","Сервисы аренды","Коворкинги","Апартаменты","Отели"]},
+      {category: 'Ритейл', businesses: ["Супермаркеты","Магазины одежды","Магазины обуви","Электроника","Онлайн-магазины","Бутики","Спортивные товары","Товары для дома","Канцелярия","Книги"]},
+      {category: 'Авто', businesses: ["Автосалоны","СТО","Автомойки","Прокат авто","Школы вождения","Каршеринг","Шины и диски","Электротранспорт"]},
+      {category: 'Развлечения и медиа', businesses: ["Кинотеатры","Театры","Концертные залы","Игровые клубы","Квесты","Детские развлекательные центры","Блогеры","Стримеры","VR-развлечения","Подкасты","Музыкальные студии"]},
+      {category: 'IT и digital', businesses: ["Разработка сайтов","Продвижение в соцсетях","Разработка приложений","SaaS-сервисы","Маркетинговые агентства","SEO-студии","UX/UI-дизайн","CRM-системы","Email-маркетинг","Контент-агентства"]},
+      {category: 'Технологии и гаджеты', businesses: ["Разработка IoT устройств","VR/AR приложения","Электроника","Гаджеты для дома","Смарт-гаджеты","Wearables"]},
+      {category: 'Дом и интерьер', businesses: ["Мебель","Декор","Текстиль","Освещение","Ремонт и отделка","Сантехника","Сад и огород","Ландшафтный дизайн","Клининг","Умный дом"]},
+      {category: 'Финансы и страхование', businesses: ["Банки","Страховые компании","Инвестиционные фонды","Финансовый консалтинг","FinTech"]},
+      {category: 'Животные и экология', businesses: ["Ветеринарные клиники","Товары для животных","Услуги для питомцев","Эко-продукты","Эко-строительство","Озеленение"]}
+    ];
+
+    const selectedNichesArr = [];
+    const selectedSegmentsArr = [];
+    const selectedPainsArr = [];
+    let selectedCaseType = '';
+    let selectedLeadType = '';
+    
+    // API Configuration
+    // Теперь ваш сайт будет обращаться к прокси-серверу, а не напрямую к API Gemini.
+    // Это скрывает ваш API-ключ от публичного доступа.
+    const PROXY_URL = "/.netlify/functions/gemini-proxy";
+
+    function showStatusMessage(message) {
+      const statusElement = document.getElementById('status-message');
+      if (!statusElement) return;
+      statusElement.textContent = message;
+      statusElement.style.opacity = '1';
+      setTimeout(() => {
+        statusElement.style.opacity = '0';
+      }, 3000);
+    }
+    
+    function toggleLoader(buttonId, show) {
+      const button = document.getElementById(buttonId);
+      if (show) {
+        button.disabled = true;
+        button.classList.add('loading');
+      } else {
+        button.disabled = false;
+        button.classList.remove('loading');
+      }
+    }
+    
+    // Функция для копирования текста в буфер обмена
+    function copyToClipboard(elementId) {
+      const textarea = document.getElementById(elementId);
+      if (!textarea || !textarea.value) {
+        showStatusMessage('Нет текста для копирования.');
+        return;
+      }
+      textarea.select();
+      document.execCommand('copy');
+      showStatusMessage('Содержимое скопировано!');
+    }
+
+    async function generateContentWithGemini(userPrompt, systemPrompt) {
+      const payload = {
+        userPrompt: userPrompt,
+        systemPrompt: systemPrompt
+      };
+
+      try {
+        const response = await fetch(PROXY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result && result.text) {
+          return result.text;
+        } else {
+          throw new Error('No content returned from API.');
+        }
+
+      } catch (error) {
+        console.error("API call failed:", error);
+        showStatusMessage('Ошибка генерации. Попробуйте снова.');
+        throw error;
+      }
+    }
+    
+    function populateNiches() {
+      const select = document.getElementById('nicheSelect');
+      niches.forEach(n => {
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = n.category;
+        n.businesses.forEach(b => {
+          const option = document.createElement('option');
+          option.value = `${n.category} - ${b}`;
+          option.textContent = b;
+          optGroup.appendChild(option);
+        });
+        select.appendChild(optGroup);
+      });
+    }
+
+    function toggleCaseType(btn, type) {
+      document.querySelectorAll('#caseTypes button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCaseType = type;
+    }
+    
+    function toggleLeadType(btn, type) {
+      document.querySelectorAll('#leadTypes button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedLeadType = type;
+    }
+
+    function clearAllData() {
+      // Очистка полей ввода и textarea
+      document.querySelectorAll('input[type="text"], textarea').forEach(t => t.value = '');
+      
+      // Очистка выбранных элементов
+      document.getElementById('selectedNiches').innerHTML = '';
+      document.getElementById('selectedSegments').innerHTML = '';
+      document.getElementById('selectedPains').innerHTML = '';
+
+      // Очистка сгенерированных списков
+      document.getElementById('segmentsList').innerHTML = '';
+      document.getElementById('painsList').innerHTML = '';
+
+      // Сброс активных кнопок
+      document.querySelectorAll('.case-buttons button').forEach(b => b.classList.remove('active'));
+      
+      // Сброс массивов
+      selectedNichesArr.length = 0;
+      selectedSegmentsArr.length = 0;
+      selectedPainsArr.length = 0;
+      selectedCaseType = '';
+      selectedLeadType = '';
+      
+      showStatusMessage('Все данные очищены!');
+    }
+
+    const segmentsList = document.getElementById('segmentsList');
+    const selectedSegments = document.getElementById('selectedSegments');
+    const painsList = document.getElementById('painsList');
+    const selectedPains = document.getElementById('selectedPains');
+
+    async function generateSegments() {
+      if (selectedNichesArr.length === 0) {
+        showStatusMessage('Сначала выберите нишу!');
+        return;
+      }
+      toggleLoader('generateSegmentsBtn', true);
+      const prompt = `Сгенерируй 5-7 сегментов целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Включи как стандартные, так и экзотические сегменты. Для каждого сегмента используй формат "Название сегмента - Краткое описание".`;
+      const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
+      
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        const segments = resultText.split('\n').filter(s => s.trim() !== '');
+        segmentsList.innerHTML = '';
+        segments.forEach(seg => {
+          const btn = document.createElement('button');
+          btn.textContent = seg;
+          btn.className = 'selected-item-btn';
+          btn.onclick = () => addSegmentToSelected(seg);
+          segmentsList.appendChild(btn);
+        });
+        showStatusMessage('Сегменты успешно сгенерированы!');
+      } catch (error) {
+        console.error("Failed to generate segments:", error);
+      } finally {
+        toggleLoader('generateSegmentsBtn', false);
+      }
+    }
+
+    async function generateDetailedReport() {
+      if (selectedNichesArr.length === 0) {
+        showStatusMessage('Сначала выберите нишу!');
+        return;
+      }
+      toggleLoader('generateDetailedReportBtn', true);
+      const prompt = `Сгенерируй максимально подробный анализ целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Выдели все возможные сегменты, дай каждому детальное описание (демография, боли, интересы, поведение) и укажи приблизительный процент от общей аудитории. Сформулируй ответ в виде подробного отчета.`;
+      const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        document.getElementById('detailedSegmentsOutput').value = resultText;
+        showStatusMessage('Детальный отчет по сегментам успешно сгенерирован!');
+      } catch (error) {
+        document.getElementById('detailedSegmentsOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+      } finally {
+        toggleLoader('generateDetailedReportBtn', false);
+      }
+    }
+
+    async function generatePains() {
+      if (selectedNichesArr.length === 0) {
+        showStatusMessage('Сначала выберите нишу!');
+        return;
+      }
+      toggleLoader('generatePainsBtn', true);
+      const prompt = `Сгенерируй 5-7 болей и фрустраций для целевой аудитории в следующих нишах: ${selectedNichesArr.join(', ')}. Для каждой боли предоставь краткое описание в том же пункте.`;
+      const systemPrompt = 'Ты - маркетолог-аналитик, который определяет боли и проблемы целевой аудитории.';
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        const pains = resultText.split('\n').filter(s => s.trim() !== '');
+        painsList.innerHTML = '';
+        pains.forEach(pain => {
+          const btn = document.createElement('button');
+          btn.textContent = pain;
+          btn.className = 'selected-item-btn';
+          btn.onclick = () => addPainToSelected(pain);
+          painsList.appendChild(btn);
+        });
+        showStatusMessage('Боли успешно сгенерированы!');
+      } catch (error) {
+        console.error("Failed to generate pains:", error);
+      } finally {
+        toggleLoader('generatePainsBtn', false);
+      }
+    }
+
+    function addCustomSegment() {
+      const input = document.getElementById('customSegment');
+      const val = input.value.trim();
+      if (!val) return;
+      addSegmentToSelected(val);
+      input.value = '';
+    }
+
+    function addCustomPain() {
+      const input = document.getElementById('customPain');
+      const val = input.value.trim();
+      if (!val) return;
+      addPainToSelected(val);
+      input.value = '';
+    }
+
+    function addSegmentToSelected(seg) {
+      if (selectedSegmentsArr.includes(seg)) {
+        showStatusMessage('Этот сегмент уже выбран!');
+        return;
+      }
+      const selBtn = document.createElement('button');
+      selBtn.textContent = seg;
+      selBtn.className = 'selected-item-btn';
+      selBtn.onclick = () => {
+          selectedSegments.removeChild(selBtn);
+          const index = selectedSegmentsArr.indexOf(seg);
+          if (index > -1) selectedSegmentsArr.splice(index, 1);
+      };
+      selectedSegments.appendChild(selBtn);
+      selectedSegmentsArr.push(seg);
+      showStatusMessage(`"${seg}" добавлен в выбранные сегменты.`);
+    }
+
+    function addPainToSelected(pain) {
+      if (selectedPainsArr.includes(pain)) {
+        showStatusMessage('Эта боль уже выбрана!');
+        return;
+      }
+      const selBtn = document.createElement('button');
+      selBtn.textContent = pain;
+      selBtn.className = 'selected-item-btn';
+      selBtn.onclick = () => {
+          selectedPains.removeChild(selBtn);
+          const index = selectedPainsArr.indexOf(pain);
+          if (index > -1) selectedPainsArr.splice(index, 1);
+      };
+      selectedPains.appendChild(selBtn);
+      selectedPainsArr.push(pain);
+      showStatusMessage(`"${pain}" добавлен в выбранные боли.`);
+    }
+
+    const selectedNichesDom = document.getElementById('selectedNiches');
+    function addSelectedNiche(sel) {
+      const val = sel.value;
+      if (!val) return;
+      if (selectedNichesArr.includes(val)) {
+        sel.value = '';
+        return;
+      }
+      const btn = document.createElement('button');
+      btn.textContent = val;
+      btn.className = 'selected-item-btn';
+      btn.onclick = () => {
+        selectedNichesDom.removeChild(btn);
+        const index = selectedNichesArr.indexOf(val);
+        if (index > -1) selectedNichesArr.splice(index, 1);
+      };
+      selectedNichesDom.appendChild(btn);
+      selectedNichesArr.push(val);
+      sel.value = '';
+    }
+
+    function addCustomNicheInput() {
+      const input = document.getElementById('customNicheInput');
+      const val = input.value.trim();
+      if (!val) return;
+      if (selectedNichesArr.includes(val)) {
+        input.value = '';
+        return;
+      }
+      const btn = document.createElement('button');
+      btn.textContent = val;
+      btn.className = 'selected-item-btn';
+      btn.onclick = () => {
+        selectedNichesDom.removeChild(btn);
+        const index = selectedNichesArr.indexOf(val);
+        if (index > -1) selectedNichesArr.splice(index, 1);
+      };
+      selectedNichesDom.appendChild(btn);
+      selectedNichesArr.push(val);
+      input.value = '';
+    }
+
+    function confirmCustomNicheURL() {
+      const url = document.getElementById('customNicheURL').value.trim();
+      if (!url) return;
+      if (selectedNichesArr.includes(url)) {
+        document.getElementById('customNicheURL').value = '';
+        return;
+      }
+      const btn = document.createElement('button');
+      btn.textContent = url;
+      btn.className = 'selected-item-btn';
+      btn.onclick = () => {
+        selectedNichesDom.removeChild(btn);
+        const index = selectedNichesArr.indexOf(url);
+        if (index > -1) selectedNichesArr.splice(index, 1);
+      };
+      selectedNichesDom.appendChild(btn);
+      selectedNichesArr.push(url);
+      document.getElementById('customNicheURL').value = '';
+    }
+    
+    async function generateLeadMagnets() {
+      const leadTitle = document.getElementById('leadTitle').value.trim();
+      if (!leadTitle || !selectedLeadType) {
+        showStatusMessage('Введите название и выберите формат!');
+        return;
+      }
+      toggleLoader('generateLeadMagnetsBtn', true);
+      const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Опиши каждую идею с деталями и прогнозируемыми результатами.`;
+      const systemPrompt = 'Ты - эксперт по лидогенерации, который придумывает ценные и привлекательные материалы для клиентов.';
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        document.getElementById('leadOutput').value = resultText;
+        showStatusMessage('Лид-магниты успешно сгенерированы!');
+      } catch (error) {
+        document.getElementById('leadOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+      } finally {
+        toggleLoader('generateLeadMagnetsBtn', false);
+      }
+    }
+
+    async function generateCases() {
+      if (selectedNichesArr.length === 0 || selectedPainsArr.length === 0 || !selectedCaseType) {
+        showStatusMessage('Сначала выберите нишу, боль и тип кейса!');
+        return;
+      }
+      toggleLoader('generateCasesBtn', true);
+      const prompt = `Сгенерируй 3-5 идей ${selectedCaseType.toLowerCase()} кейсов для ниш: ${selectedNichesArr.join(', ')}. Кейсы должны решать следующие боли и фрустрации: ${selectedPainsArr.join(', ')}. Опиши каждый кейс в отдельном абзаце, включая прогнозируемые результаты (например, "увеличение продаж на X%").`;
+      const systemPrompt = 'Ты - креативный директор, который придумывает яркие и запоминающиеся маркетинговые кейсы.';
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        document.getElementById('caseOutput').value = resultText;
+        showStatusMessage('Кейсы успешно сгенерированы!');
+      } catch (error) {
+        document.getElementById('caseOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+      } finally {
+        toggleLoader('generateCasesBtn', false);
+      }
+    }
+
+    async function generateFunnels() {
+      if (selectedNichesArr.length === 0) {
+        showStatusMessage('Сначала выберите нишу!');
+        return;
+      }
+      toggleLoader('generateFunnelsBtn', true);
+      const prompt = `Сгенерируй 3-5 идей воронок продаж по модели AIDA (Attention, Interest, Desire, Action) для ниш: ${selectedNichesArr.join(', ')}. Опиши каждый этап воронки подробно.`;
+      const systemPrompt = 'Ты - стратег по продажам, который разрабатывает эффективные воронки для бизнеса.';
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        document.getElementById('funnelOutput').value = resultText;
+        showStatusMessage('Воронка успешно сгенерирована!');
+      } catch (error) {
+        document.getElementById('funnelOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+      } finally {
+        toggleLoader('generateFunnelsBtn', false);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', populateNiches);
+  </script>
+
+</body>
+</html>
