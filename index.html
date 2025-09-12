@@ -330,11 +330,8 @@
     let selectedCaseType = '';
     let selectedLeadType = '';
     
-    // ВАЖНО: ВСТАВЬТЕ СЮДА ВАШ API-КЛЮЧ!
-    // Эту строку нужно заменить на ваш ключ, полученный из Google AI Studio.
-    const API_KEY = "";
-    const API_MODEL = "gemini-2.5-flash-preview-05-20";
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent?key=${API_KEY}`;
+    // API-ключ теперь скрыт в прокси-сервере Vercel.
+    const PROXY_URL = '/api/vercel-proxy';
 
     function showStatusMessage(message) {
       const statusElement = document.getElementById('status-message');
@@ -371,31 +368,24 @@
 
     async function generateContentWithGemini(userPrompt, systemPrompt) {
       const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        tools: [{ "google_search": {} }],
-        systemInstruction: { parts: [{ text: systemPrompt }] },
+        userPrompt: userPrompt,
+        systemPrompt: systemPrompt
       };
 
       try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(PROXY_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Ошибка прокси-сервера.');
         }
 
         const result = await response.json();
-        const candidate = result.candidates?.[0];
-        const text = candidate?.content?.parts?.[0]?.text;
-
-        if (!text) {
-          throw new Error('No content returned from API.');
-        }
-
-        return text.replace(/\*/g, '').trim();
+        return result.text;
 
       } catch (error) {
         console.error("API call failed:", error);
@@ -605,7 +595,6 @@
         if (index > -1) selectedNichesArr.splice(index, 1);
       };
       selectedNichesDom.appendChild(btn);
-      selectedNichesArr.push(val);
       sel.value = '';
     }
 
