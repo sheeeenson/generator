@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Creative Kitchen Generator</title>
+  <title>Товарищ генератор</title>
+  <!-- Фавикон в виде эмодзи-лампочки. Это позволяет встроить иконку прямо в HTML, не создавая отдельный файл. -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>">
   <style>
     /* Базовые стили для мобильных устройств (mobile-first approach) */
     body { 
@@ -25,6 +27,12 @@
       border-radius: 8px; 
       margin-bottom: 20px; 
       border: 1px solid #e0e0e0; 
+    }
+    h1 {
+      font-size: 32px;
+      color: #222;
+      text-align: center;
+      margin-bottom: 20px;
     }
     h2 { 
       font-size: 20px; 
@@ -165,6 +173,10 @@
     .selected-item-btn:hover { 
       background: #ddd; 
     }
+    .selected-item-btn.active {
+      background: #28a745;
+      color: #fff;
+    }
     
     textarea { 
       resize: vertical; 
@@ -216,6 +228,7 @@
 </head>
 <body>
   <div class="container">
+    <h1>Товарищ генератор</h1>
     <!-- Блок выбора ниши -->
     <div class="block">
       <h2>Выбор ниши</h2>
@@ -285,6 +298,42 @@
       <button class="save-btn" onclick="copyToClipboard('funnelOutput')">Скопировать</button>
     </div>
 
+    <!-- Новый блок: Генерация контента для соцсетей -->
+    <div class="block">
+        <h2>Генерация контента для соцсетей</h2>
+        <label>Выберите платформу:</label>
+        <div class="case-buttons" id="socialMediaTypes">
+            <button class="btn" onclick="toggleSocialMedia(this, 'Instagram')">Instagram</button>
+            <button class="btn" onclick="toggleSocialMedia(this, 'Telegram')">Telegram</button>
+            <button class="btn" onclick="toggleSocialMedia(this, 'TikTok')">TikTok</button>
+            <button class="btn" onclick="toggleSocialMedia(this, 'YouTube')">YouTube</button>
+            <button class="btn" onclick="toggleSocialMedia(this, 'VK')">VK</button>
+        </div>
+        <label style="margin-top: 20px;">Выберите тип контента:</label>
+        <div class="case-buttons" id="contentTypeButtons">
+            <button class="btn" onclick="toggleContentType(this, 'Пост')">Пост</button>
+            <button class="btn" onclick="toggleContentType(this, 'Сторис')">Сторис</button>
+            <button class="btn" onclick="toggleContentType(this, 'Рилс')">Рилс</button>
+            <button class="btn" onclick="toggleContentType(this, 'Тик-ток')">Тик-ток</button>
+        </div>
+        <button id="generateSocialMediaBtn" class="generate-btn" onclick="generateSocialMediaContent()">Сгенерировать идеи для контента</button>
+        <label style="margin-top: 20px;">Кликните по идее, чтобы добавить в план:</label>
+        <div id="socialMediaIdeasList" class="selected-items"></div>
+    </div>
+
+    <!-- Новый блок: Генерация контент-плана -->
+    <div class="block">
+        <h2>Генерация контент-плана</h2>
+        <label>Выберите временной период:</label>
+        <div class="case-buttons" id="timePeriodTypes">
+            <button class="btn" onclick="toggleTimePeriod(this, 'Неделю')">Неделя</button>
+            <button class="btn" onclick="toggleTimePeriod(this, 'Месяц')">Месяц</button>
+        </div>
+        <button id="generateContentPlanBtn" class="generate-btn" onclick="generateContentPlan()">Сгенерировать контент-план</button>
+        <textarea id="contentPlanOutput" rows="10" placeholder="Здесь будет результат генерации контент-плана"></textarea>
+        <button class="save-btn" onclick="copyToClipboard('contentPlanOutput')">Скопировать</button>
+    </div>
+
     <!-- Блок лид-магнитов -->
     <div class="block">
       <h2>Лид-магниты</h2>
@@ -302,8 +351,9 @@
       <textarea id="leadOutput" rows="6" placeholder="Здесь будет результат генерации"></textarea>
       <button class="save-btn" onclick="copyToClipboard('leadOutput')">Скопировать</button>
     </div>
-
-    <!-- Кнопка очистить всё -->
+    
+    <!-- Кнопки внизу страницы -->
+    <button class="save-btn" onclick="copyAllBlocks()">Скопировать всё</button>
     <button class="clear-btn" onclick="clearAllData()">Очистить всё</button>
     <div id="status-message" class="status-message"></div>
   </div>
@@ -320,15 +370,19 @@
       {category: 'IT и digital', businesses: ["Разработка сайтов","Продвижение в соцсетях","Разработка приложений","SaaS-сервисы","Маркетинговые агентства","SEO-студии","UX/UI-дизайн","CRM-системы","Email-маркетинг","Контент-агентства"]},
       {category: 'Технологии и гаджеты', businesses: ["Разработка IoT устройств","VR/AR приложения","Электроника","Гаджеты для дома","Смарт-гаджеты","Wearables"]},
       {category: 'Дом и интерьер', businesses: ["Мебель","Декор","Текстиль","Освещение","Ремонт и отделка","Сантехника","Сад и огород","Ландшафтный дизайн","Клининг","Умный дом"]},
-      {category: 'Финансы и страхование', businesses: ["Банки","Страховые компании","Инвестиционные фонды","Финансовый консалтинг","FinTech"]},
+      {category: 'Финансы и страхование', businesses: ["Банки","Страховые компании","Инвестиционные фонсы","Финансовый консалтинг","FinTech"]},
       {category: 'Животные и экология', businesses: ["Ветеринарные клиники","Товары для животных","Услуги для питомцев","Эко-продукты","Эко-строительство","Озеленение"]}
     ];
 
     const selectedNichesArr = [];
     const selectedSegmentsArr = [];
     const selectedPainsArr = [];
+    const selectedContentIdeasArr = [];
     let selectedCaseType = '';
     let selectedLeadType = '';
+    let selectedTimePeriod = '';
+    let selectedSocialMedia = '';
+    let selectedContentType = '';
     
     // API-ключ теперь скрыт в прокси-сервере Vercel.
     const PROXY_URL = '/api/vercel-proxy';
@@ -364,6 +418,41 @@
       textarea.select();
       document.execCommand('copy');
       showStatusMessage('Содержимое скопировано!');
+    }
+
+    // Новая функция для копирования всего контента
+    function copyAllBlocks() {
+        const outputs = [
+            { id: 'detailedSegmentsOutput', title: 'Подробный отчет по сегментам' },
+            { id: 'caseOutput', title: 'Кейсы' },
+            { id: 'funnelOutput', title: 'Воронки AIDA' },
+            { id: 'contentPlanOutput', title: 'Контент-план' },
+            { id: 'leadOutput', title: 'Лид-магниты' }
+        ];
+
+        let combinedText = '';
+
+        outputs.forEach(output => {
+            const textarea = document.getElementById(output.id);
+            if (textarea && textarea.value.trim() !== '') {
+                combinedText += `\n--- ${output.title} ---\n\n`;
+                combinedText += textarea.value + '\n';
+            }
+        });
+
+        if (combinedText.trim() === '') {
+            showStatusMessage('Нет данных для копирования.');
+            return;
+        }
+
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = combinedText;
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextarea);
+
+        showStatusMessage('Все данные скопированы!');
     }
 
     async function generateContentWithGemini(userPrompt, systemPrompt) {
@@ -421,6 +510,25 @@
       selectedLeadType = type;
     }
 
+    function toggleTimePeriod(btn, period) {
+      document.querySelectorAll('#timePeriodTypes button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedTimePeriod = period;
+    }
+
+    function toggleSocialMedia(btn, platform) {
+      document.querySelectorAll('#socialMediaTypes button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedSocialMedia = platform;
+    }
+
+    function toggleContentType(btn, type) {
+        document.querySelectorAll('#contentTypeButtons button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedContentType = type;
+    }
+
+
     function clearAllData() {
       // Очистка полей ввода и textarea
       document.querySelectorAll('input[type="text"], textarea').forEach(t => t.value = '');
@@ -429,6 +537,8 @@
       document.getElementById('selectedNiches').innerHTML = '';
       document.getElementById('selectedSegments').innerHTML = '';
       document.getElementById('selectedPains').innerHTML = '';
+      document.getElementById('socialMediaIdeasList').innerHTML = '';
+      document.getElementById('contentPlanOutput').value = '';
 
       // Очистка сгенерированных списков
       document.getElementById('segmentsList').innerHTML = '';
@@ -441,8 +551,12 @@
       selectedNichesArr.length = 0;
       selectedSegmentsArr.length = 0;
       selectedPainsArr.length = 0;
+      selectedContentIdeasArr.length = 0;
       selectedCaseType = '';
       selectedLeadType = '';
+      selectedTimePeriod = '';
+      selectedSocialMedia = '';
+      selectedContentType = '';
       
       showStatusMessage('Все данные очищены!');
     }
@@ -616,7 +730,6 @@
         if (index > -1) selectedNichesArr.splice(index, 1);
       };
       selectedNichesDom.appendChild(btn);
-      selectedNichesArr.push(val);
       input.value = '';
     }
 
@@ -636,18 +749,17 @@
         if (index > -1) selectedNichesArr.splice(index, 1);
       };
       selectedNichesDom.appendChild(btn);
-      selectedNichesArr.push(url);
       document.getElementById('customNicheURL').value = '';
     }
     
     async function generateLeadMagnets() {
       const leadTitle = document.getElementById('leadTitle').value.trim();
-      if (!leadTitle || !selectedLeadType) {
-        showStatusMessage('Введите название и выберите формат!');
+      if (!leadTitle || !selectedLeadType || selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0) {
+        showStatusMessage('Выберите нишу, сегмент, боль, введите название и выберите формат!');
         return;
       }
       toggleLoader('generateLeadMagnetsBtn', true);
-      const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Опиши каждую идею с деталями и прогнозируемыми результатами.`;
+      const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Эти лид-магниты должны решать боли (${selectedPainsArr.join(', ')}) и быть нацелены на сегменты (${selectedSegmentsArr.join(', ')}) в нишах: ${selectedNichesArr.join(', ')}. Опиши каждую идею с деталями и прогнозируемыми результатами.`;
       const systemPrompt = 'Ты - эксперт по лидогенерации, который придумывает ценные и привлекательные материалы для клиентов.';
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
@@ -661,12 +773,12 @@
     }
 
     async function generateCases() {
-      if (selectedNichesArr.length === 0 || selectedPainsArr.length === 0 || !selectedCaseType) {
-        showStatusMessage('Сначала выберите нишу, боль и тип кейса!');
+      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0 || !selectedCaseType) {
+        showStatusMessage('Сначала выберите нишу, сегмент, боль и тип кейса!');
         return;
       }
       toggleLoader('generateCasesBtn', true);
-      const prompt = `Сгенерируй 3-5 идей ${selectedCaseType.toLowerCase()} кейсов для ниш: ${selectedNichesArr.join(', ')}. Кейсы должны решать следующие боли и фрустрации: ${selectedPainsArr.join(', ')}. Опиши каждый кейс в отдельном абзаце, включая прогнозируемые результаты (например, "увеличение продаж на X%").`;
+      const prompt = `Сгенерируй 3-5 идей ${selectedCaseType.toLowerCase()} кейсов для ниш: ${selectedNichesArr.join(', ')}. Кейсы должны быть нацелены на сегменты: ${selectedSegmentsArr.join(', ')} и решать следующие боли и фрустрации: ${selectedPainsArr.join(', ')}. Опиши каждый кейс в отдельном абзаце, включая прогнозируемые результаты (например, "увеличение продаж на X%").`;
       const systemPrompt = 'Ты - креативный директор, который придумывает яркие и запоминающиеся маркетинговые кейсы.';
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
@@ -680,12 +792,12 @@
     }
 
     async function generateFunnels() {
-      if (selectedNichesArr.length === 0) {
-        showStatusMessage('Сначала выберите нишу!');
+      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0) {
+        showStatusMessage('Сначала выберите нишу, сегмент и боль!');
         return;
       }
       toggleLoader('generateFunnelsBtn', true);
-      const prompt = `Сгенерируй 3-5 идей воронок продаж по модели AIDA (Attention, Interest, Desire, Action) для ниш: ${selectedNichesArr.join(', ')}. Опиши каждый этап воронки подробно.`;
+      const prompt = `Сгенерируй 3-5 идей воронок продаж по модели AIDA (Attention, Interest, Desire, Action) для ниш: ${selectedNichesArr.join(', ')}. Воронки должны быть ориентированы на сегменты: ${selectedSegmentsArr.join(', ')} и решать их боли: ${selectedPainsArr.join(', ')}. Опиши каждый этап воронки подробно, учитывая специфику аудитории.`;
       const systemPrompt = 'Ты - стратег по продажам, который разрабатывает эффективные воронки для бизнеса.';
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
@@ -695,6 +807,65 @@
         document.getElementById('funnelOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
       } finally {
         toggleLoader('generateFunnelsBtn', false);
+      }
+    }
+
+    async function generateSocialMediaContent() {
+      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0 || !selectedSocialMedia || !selectedContentType) {
+        showStatusMessage('Выберите нишу, сегмент, боль, платформу и тип контента!');
+        return;
+      }
+      toggleLoader('generateSocialMediaBtn', true);
+      const prompt = `Сгенерируй 3-5 идей для контента формата "${selectedContentType}" для платформы "${selectedSocialMedia}". Контент должен быть предназначен для ниши: ${selectedNichesArr.join(', ')}. Учитывай, что контент должен быть нацелен на сегменты: ${selectedSegmentsArr.join(', ')} и решать их боли: ${selectedPainsArr.join(', ')}. Опиши каждую идею с учетом специфики платформы (визуал, текст, формат).`;
+      const systemPrompt = 'Ты - SMM-менеджер, который придумывает креативный и адаптированный контент для соцсетей.';
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        const ideas = resultText.split('\n').filter(s => s.trim() !== '');
+        const ideasList = document.getElementById('socialMediaIdeasList');
+        ideasList.innerHTML = '';
+        selectedContentIdeasArr.length = 0;
+        ideas.forEach(idea => {
+            const btn = document.createElement('button');
+            btn.textContent = idea;
+            btn.className = 'selected-item-btn';
+            btn.onclick = () => {
+                const index = selectedContentIdeasArr.indexOf(idea);
+                if (index === -1) {
+                    selectedContentIdeasArr.push(idea);
+                    btn.classList.add('active');
+                    showStatusMessage(`"${idea}" добавлена.`);
+                } else {
+                    selectedContentIdeasArr.splice(index, 1);
+                    btn.classList.remove('active');
+                    showStatusMessage(`"${idea}" удалена.`);
+                }
+            };
+            ideasList.appendChild(btn);
+        });
+        showStatusMessage('Идеи для контента успешно сгенерированы!');
+      } catch (error) {
+        console.error("Failed to generate content ideas:", error);
+      } finally {
+        toggleLoader('generateSocialMediaBtn', false);
+      }
+    }
+
+    async function generateContentPlan() {
+      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0 || selectedContentIdeasArr.length === 0 || !selectedTimePeriod) {
+        showStatusMessage('Сначала выберите нишу, сегмент, боль, идеи и временной период!');
+        return;
+      }
+      toggleLoader('generateContentPlanBtn', true);
+      const prompt = `Сгенерируй подробный контент-план на ${selectedTimePeriod} для ниш: ${selectedNichesArr.join(', ')}. План должен быть нацелен на сегменты: ${selectedSegmentsArr.join(', ')} и предлагать решения для их болей: ${selectedPainsArr.join(', ')}. Включи в план следующие идеи для контента, распределенные по дням или неделям: ${selectedContentIdeasArr.join(', ')}.`;
+      const systemPrompt = 'Ты - SMM-стратег, который создает подробные и эффективные контент-планы.';
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        document.getElementById('contentPlanOutput').value = resultText;
+        showStatusMessage('Контент-план успешно сгенерирован!');
+      } catch (error) {
+        document.getElementById('contentPlanOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+      } finally {
+        toggleLoader('generateContentPlanBtn', false);
       }
     }
 
