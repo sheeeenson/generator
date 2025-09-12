@@ -330,10 +330,11 @@
     let selectedCaseType = '';
     let selectedLeadType = '';
     
-    // API Configuration
-    // Теперь ваш сайт будет обращаться к прокси-серверу, а не напрямую к API Gemini.
-    // Это скрывает ваш API-ключ от публичного доступа.
-    const PROXY_URL = "/.netlify/functions/gemini-proxy";
+    // ВАЖНО: ВСТАВЬТЕ СЮДА ВАШ API-КЛЮЧ!
+    // Эту строку нужно заменить на ваш ключ, полученный из Google AI Studio.
+    const API_KEY = "AIzaSyDjY62_vMiirgizUINE1b9ynjyXdGf9OG8";
+    const API_MODEL = "gemini-2.5-flash-preview-05-20";
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent?key=${API_KEY}`;
 
     function showStatusMessage(message) {
       const statusElement = document.getElementById('status-message');
@@ -370,12 +371,13 @@
 
     async function generateContentWithGemini(userPrompt, systemPrompt) {
       const payload = {
-        userPrompt: userPrompt,
-        systemPrompt: systemPrompt
+        contents: [{ parts: [{ text: userPrompt }] }],
+        tools: [{ "google_search": {} }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
       };
 
       try {
-        const response = await fetch(PROXY_URL, {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -386,11 +388,14 @@
         }
 
         const result = await response.json();
-        if (result && result.text) {
-          return result.text;
-        } else {
+        const candidate = result.candidates?.[0];
+        const text = candidate?.content?.parts?.[0]?.text;
+
+        if (!text) {
           throw new Error('No content returned from API.');
         }
+
+        return text.replace(/\*/g, '').trim();
 
       } catch (error) {
         console.error("API call failed:", error);
