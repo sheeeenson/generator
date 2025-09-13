@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Товарищ генератор</title>
+  <title>генерАIтор</title>
   <!-- Фавикон в виде эмодзи-лампочки. Это позволяет встроить иконку прямо в HTML, не создавая отдельный файл. -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>">
   <style>
@@ -301,37 +301,15 @@
     <!-- Новый блок: Генерация контента для соцсетей -->
     <div class="block">
         <h2>Генерация контента для соцсетей</h2>
-        <label>Выберите платформу:</label>
-        <div class="case-buttons" id="socialMediaTypes">
-            <button class="btn" onclick="toggleSocialMedia(this, 'Instagram')">Instagram</button>
-            <button class="btn" onclick="toggleSocialMedia(this, 'Telegram')">Telegram</button>
-            <button class="btn" onclick="toggleSocialMedia(this, 'TikTok')">TikTok</button>
-            <button class="btn" onclick="toggleSocialMedia(this, 'YouTube')">YouTube</button>
-            <button class="btn" onclick="toggleSocialMedia(this, 'VK')">VK</button>
-        </div>
-        <label style="margin-top: 20px;">Выберите тип контента:</label>
+        <label>Выберите тип контента:</label>
         <div class="case-buttons" id="contentTypeButtons">
             <button class="btn" onclick="toggleContentType(this, 'Пост')">Пост</button>
-            <button class="btn" onclick="toggleContentType(this, 'Сторис')">Сторис</button>
-            <button class="btn" onclick="toggleContentType(this, 'Рилс')">Рилс</button>
-            <button class="btn" onclick="toggleContentType(this, 'Тик-ток')">Тик-ток</button>
+            <button class="btn" onclick="toggleContentType(this, 'Лонгрид')">Лонгрид</button>
+            <button class="btn" onclick="toggleContentType(this, 'Сценарий рилс')">Сценарий рилс</button>
         </div>
         <button id="generateSocialMediaBtn" class="generate-btn" onclick="generateSocialMediaContent()">Сгенерировать идеи для контента</button>
-        <label style="margin-top: 20px;">Кликните по идее, чтобы добавить в план:</label>
-        <div id="socialMediaIdeasList" class="selected-items"></div>
-    </div>
-
-    <!-- Новый блок: Генерация контент-плана -->
-    <div class="block">
-        <h2>Генерация контент-плана</h2>
-        <label>Выберите временной период:</label>
-        <div class="case-buttons" id="timePeriodTypes">
-            <button class="btn" onclick="toggleTimePeriod(this, 'Неделю')">Неделя</button>
-            <button class="btn" onclick="toggleTimePeriod(this, 'Месяц')">Месяц</button>
-        </div>
-        <button id="generateContentPlanBtn" class="generate-btn" onclick="generateContentPlan()">Сгенерировать контент-план</button>
-        <textarea id="contentPlanOutput" rows="10" placeholder="Здесь будет результат генерации контент-плана"></textarea>
-        <button class="save-btn" onclick="copyToClipboard('contentPlanOutput')">Скопировать</button>
+        <textarea id="socialMediaOutput" rows="10" placeholder="Здесь будет результат генерации идей для контента"></textarea>
+        <button class="save-btn" onclick="copyToClipboard('socialMediaOutput')">Скопировать</button>
     </div>
 
     <!-- Блок лид-магнитов -->
@@ -344,8 +322,6 @@
         <button class="btn" onclick="toggleLeadType(this, 'гайд')">Гайд</button>
         <button class="btn" onclick="toggleLeadType(this, 'чек-лист')">Чек-лист</button>
         <button class="btn" onclick="toggleLeadType(this, 'мини-курс')">Мини-курс</button>
-        <button class="btn" onclick="toggleLeadType(this, 'видео')">Видео</button>
-        <button class="btn" onclick="toggleLeadType(this, 'подкаст')">Подкаст</button>
       </div>
       <button id="generateLeadMagnetsBtn" class="generate-btn" onclick="generateLeadMagnets()">Сгенерировать лид-магнит</button>
       <textarea id="leadOutput" rows="6" placeholder="Здесь будет результат генерации"></textarea>
@@ -377,11 +353,8 @@
     const selectedNichesArr = [];
     const selectedSegmentsArr = [];
     const selectedPainsArr = [];
-    const selectedContentIdeasArr = [];
     let selectedCaseType = '';
     let selectedLeadType = '';
-    let selectedTimePeriod = '';
-    let selectedSocialMedia = '';
     let selectedContentType = '';
     
     // API-ключ теперь скрыт в прокси-сервере Vercel.
@@ -426,7 +399,7 @@
             { id: 'detailedSegmentsOutput', title: 'Подробный отчет по сегментам' },
             { id: 'caseOutput', title: 'Кейсы' },
             { id: 'funnelOutput', title: 'Воронки AIDA' },
-            { id: 'contentPlanOutput', title: 'Контент-план' },
+            { id: 'socialMediaOutput', title: 'Идеи для контента' },
             { id: 'leadOutput', title: 'Лид-магниты' }
         ];
 
@@ -510,18 +483,6 @@
       selectedLeadType = type;
     }
 
-    function toggleTimePeriod(btn, period) {
-      document.querySelectorAll('#timePeriodTypes button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedTimePeriod = period;
-    }
-
-    function toggleSocialMedia(btn, platform) {
-      document.querySelectorAll('#socialMediaTypes button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedSocialMedia = platform;
-    }
-
     function toggleContentType(btn, type) {
         document.querySelectorAll('#contentTypeButtons button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -537,8 +498,6 @@
       document.getElementById('selectedNiches').innerHTML = '';
       document.getElementById('selectedSegments').innerHTML = '';
       document.getElementById('selectedPains').innerHTML = '';
-      document.getElementById('socialMediaIdeasList').innerHTML = '';
-      document.getElementById('contentPlanOutput').value = '';
 
       // Очистка сгенерированных списков
       document.getElementById('segmentsList').innerHTML = '';
@@ -551,11 +510,8 @@
       selectedNichesArr.length = 0;
       selectedSegmentsArr.length = 0;
       selectedPainsArr.length = 0;
-      selectedContentIdeasArr.length = 0;
       selectedCaseType = '';
       selectedLeadType = '';
-      selectedTimePeriod = '';
-      selectedSocialMedia = '';
       selectedContentType = '';
       
       showStatusMessage('Все данные очищены!');
@@ -572,7 +528,7 @@
         return;
       }
       toggleLoader('generateSegmentsBtn', true);
-      const prompt = `Сгенерируй 5-7 сегментов целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Включи как стандартные, так и экзотические сегменты. Для каждого сегмента используй формат "Название сегмента - Краткое описание".`;
+      const prompt = `Сгенерируй 7-10 максимально широких и разнообразных сегментов целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Проанализируй демографию, интересы, поведение и психографику. Включи не только очевидные, но и нестандартные, "экзотические" сегменты. Для каждого сегмента используй формат "Название сегмента - Краткое описание".`;
       const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
       
       try {
@@ -619,7 +575,7 @@
         return;
       }
       toggleLoader('generatePainsBtn', true);
-      const prompt = `Сгенерируй 5-7 болей и фрустраций для целевой аудитории в следующих нишах: ${selectedNichesArr.join(', ')}. Для каждой боли предоставь краткое описание в том же пункте.`;
+      const prompt = `Проведи глубокий анализ и сгенерируй 7-10 болей и фрустраций для целевой аудитории в следующих нишах: ${selectedNichesArr.join(', ')}. Для каждой боли предоставь детальное описание, объясни ее причины, как она проявляется в жизни клиента и какие "триггеры" ее вызывают. Представь это как часть полноценного маркетингового исследования.`;
       const systemPrompt = 'Ты - маркетолог-аналитик, который определяет боли и проблемы целевой аудитории.';
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
@@ -811,61 +767,21 @@
     }
 
     async function generateSocialMediaContent() {
-      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0 || !selectedSocialMedia || !selectedContentType) {
-        showStatusMessage('Выберите нишу, сегмент, боль, платформу и тип контента!');
+      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0 || !selectedContentType) {
+        showStatusMessage('Выберите нишу, сегмент, боль и тип контента!');
         return;
       }
       toggleLoader('generateSocialMediaBtn', true);
-      const prompt = `Сгенерируй 3-5 идей для контента формата "${selectedContentType}" для платформы "${selectedSocialMedia}". Контент должен быть предназначен для ниши: ${selectedNichesArr.join(', ')}. Учитывай, что контент должен быть нацелен на сегменты: ${selectedSegmentsArr.join(', ')} и решать их боли: ${selectedPainsArr.join(', ')}. Опиши каждую идею с учетом специфики платформы (визуал, текст, формат).`;
+      const prompt = `Сгенерируй 3-5 идей для контента формата "${selectedContentType}". Контент должен быть предназначен для ниши: ${selectedNichesArr.join(', ')}. Учитывай, что контент должен быть нацелен на сегменты: ${selectedSegmentsArr.join(', ')} и решать их боли: ${selectedPainsArr.join(', ')}. Опиши каждую идею с учетом специфики контента (визуал, текст, формат).`;
       const systemPrompt = 'Ты - SMM-менеджер, который придумывает креативный и адаптированный контент для соцсетей.';
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        const ideas = resultText.split('\n').filter(s => s.trim() !== '');
-        const ideasList = document.getElementById('socialMediaIdeasList');
-        ideasList.innerHTML = '';
-        selectedContentIdeasArr.length = 0;
-        ideas.forEach(idea => {
-            const btn = document.createElement('button');
-            btn.textContent = idea;
-            btn.className = 'selected-item-btn';
-            btn.onclick = () => {
-                const index = selectedContentIdeasArr.indexOf(idea);
-                if (index === -1) {
-                    selectedContentIdeasArr.push(idea);
-                    btn.classList.add('active');
-                    showStatusMessage(`"${idea}" добавлена.`);
-                } else {
-                    selectedContentIdeasArr.splice(index, 1);
-                    btn.classList.remove('active');
-                    showStatusMessage(`"${idea}" удалена.`);
-                }
-            };
-            ideasList.appendChild(btn);
-        });
+        document.getElementById('socialMediaOutput').value = resultText;
         showStatusMessage('Идеи для контента успешно сгенерированы!');
       } catch (error) {
-        console.error("Failed to generate content ideas:", error);
+        document.getElementById('socialMediaOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
       } finally {
         toggleLoader('generateSocialMediaBtn', false);
-      }
-    }
-
-    async function generateContentPlan() {
-      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0 || selectedContentIdeasArr.length === 0 || !selectedTimePeriod) {
-        showStatusMessage('Сначала выберите нишу, сегмент, боль, идеи и временной период!');
-        return;
-      }
-      toggleLoader('generateContentPlanBtn', true);
-      const prompt = `Сгенерируй подробный контент-план на ${selectedTimePeriod} для ниш: ${selectedNichesArr.join(', ')}. План должен быть нацелен на сегменты: ${selectedSegmentsArr.join(', ')} и предлагать решения для их болей: ${selectedPainsArr.join(', ')}. Включи в план следующие идеи для контента, распределенные по дням или неделям: ${selectedContentIdeasArr.join(', ')}.`;
-      const systemPrompt = 'Ты - SMM-стратег, который создает подробные и эффективные контент-планы.';
-      try {
-        const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        document.getElementById('contentPlanOutput').value = resultText;
-        showStatusMessage('Контент-план успешно сгенерирован!');
-      } catch (error) {
-        document.getElementById('contentPlanOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
-      } finally {
-        toggleLoader('generateContentPlanBtn', false);
       }
     }
 
