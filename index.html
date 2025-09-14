@@ -8,10 +8,10 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>">
   <style>
     /* Базовые стили для мобильных устройств (mobile-first approach) */
-    body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-      padding: 10px; 
-      background: #f9f9f9; 
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 10px;
+      background: #f9f9f9;
       margin: 0;
     }
 
@@ -21,12 +21,12 @@
       padding: 0 10px;
     }
 
-    .block { 
-      background: #fff; 
-      padding: 20px; 
-      border-radius: 8px; 
-      margin-bottom: 20px; 
-      border: 1px solid #e0e0e0; 
+    .block {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #e0e0e0;
     }
     h1 {
       font-size: 32px;
@@ -34,43 +34,43 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    h2 { 
-      font-size: 20px; 
-      color: #222; 
-      margin-bottom: 12px; 
+    h2 {
+      font-size: 20px;
+      color: #222;
+      margin-bottom: 12px;
     }
-    label { 
-      display: block; 
-      margin-top: 10px; 
-      font-weight: 600; 
-      color: #333; 
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+      color: #333;
     }
-    input, select, textarea, button { 
-      width: 100%; 
-      padding: 10px; 
-      margin-top: 5px; 
-      border-radius: 6px; 
-      border: 1px solid #ccc; 
-      font-size: 14px; 
-      background: #fff; 
-      box-sizing: border-box; 
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      background: #fff;
+      box-sizing: border-box;
     }
-    .btn { 
-      background: #222; 
-      color: #fff; 
-      border: none; 
-      cursor: pointer; 
-      font-weight: 600; 
-      position: relative; 
+    .btn {
+      background: #222;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      position: relative;
     }
-    .btn:hover { 
-      background: #444; 
+    .btn:hover {
+      background: #444;
     }
-    .btn:disabled { 
-      background: #999; 
-      cursor: not-allowed; 
+    .btn:disabled {
+      background: #999;
+      cursor: not-allowed;
     }
-    
+
     .generate-btn {
       background: #fff;
       color: #222;
@@ -97,7 +97,7 @@
     .generate-btn.loading {
       cursor: wait;
     }
-    
+
     .generate-btn.loading::after {
       width: 100%;
       animation: progress 2s infinite;
@@ -120,43 +120,43 @@
     }
 
     .save-btn {
-      background: #f5f5dc; 
+      background: #f5f5dc;
       color: #222;
       border: 1px solid #222;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 10px; 
+      margin-top: 10px;
     }
     .save-btn:hover {
       background: #e0d9b8;
     }
 
-    .clear-btn { 
-      background: #222; 
-      color: #fff; 
+    .clear-btn {
+      background: #222;
+      color: #fff;
       border: none;
-      margin-top: 15px; 
+      margin-top: 15px;
     }
-    .clear-btn:hover { 
-      background: #444; 
+    .clear-btn:hover {
+      background: #444;
     }
 
-    .case-buttons { 
-      display: flex; 
-      gap: 10px; 
-      margin-top: 5px; 
-      flex-wrap: wrap; 
+    .case-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+      flex-wrap: wrap;
     }
-    .case-buttons button { 
-      flex: 1; 
-      background: #222; 
-      color: #fff; 
+    .case-buttons button {
+      flex: 1;
+      background: #222;
+      color: #fff;
       min-width: 100px;
     }
-    .case-buttons button.active { 
-      background: #28a745; 
+    .case-buttons button.active {
+      background: #28a745;
     }
-    .generated-list { 
+    .generated-list {
       margin-top: 10px;
     }
     .generated-segment, .generated-pain {
@@ -175,31 +175,31 @@
       border-color: #28a745;
       background-color: #d4edda;
     }
-    .selected-items { 
-      display: flex; 
-      gap: 8px; 
-      flex-wrap: wrap; 
-      margin-top: 10px; 
+    .selected-items {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
     }
-    .selected-item-btn { 
-      background: #eee; 
-      color: #333; 
-      padding: 6px 12px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      border: none; 
+    .selected-item-btn {
+      background: #eee;
+      color: #333;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
     }
-    .selected-item-btn:hover { 
-      background: #ddd; 
+    .selected-item-btn:hover {
+      background: #ddd;
     }
     .selected-item-btn.active {
       background: #28a745;
       color: #fff;
     }
-    
-    textarea { 
-      resize: vertical; 
-      margin-top: 15px; 
+
+    textarea {
+      resize: vertical;
+      margin-top: 15px;
     }
     .status-message {
       position: fixed;
@@ -214,7 +214,7 @@
       opacity: 0;
       transition: opacity 0.3s ease-in-out;
     }
-    
+
     /* Медиа-запросы для планшетов */
     @media (min-width: 600px) {
       body {
@@ -254,7 +254,7 @@
     .inverted-block h2, .inverted-block label {
       color: #fff;
     }
-    
+
     .inverted-block input, .inverted-block select, .inverted-block textarea {
       background: #444;
       color: #fff;
@@ -315,7 +315,7 @@
       <button class="btn" onclick="addCustomSegment()">Добавить сегмент</button>
       <div id="selectedSegments" class="selected-items"></div>
     </div>
-    
+
     <!-- Новый блок: Боли и фрустрации -->
     <div class="block">
       <h2>Боли и фрустрации</h2>
@@ -379,7 +379,7 @@
       <textarea id="creativeLeadOutput" rows="6" placeholder="Здесь будет результат генерации креативных идей"></textarea>
       <button class="save-btn" onclick="copyToClipboard('creativeLeadOutput')">Скопировать</button>
     </div>
-    
+
     <!-- Кнопки внизу страницы -->
     <button class="save-btn" onclick="copyAllBlocks()">Скопировать всё</button>
     <button class="clear-btn" onclick="clearAllData()">Очистить всё</button>
@@ -409,7 +409,7 @@
     let selectedCreativeLeadType = '';
     let selectedStrategicLeadType = '';
     let selectedContentType = '';
-    
+
     // API-ключ теперь скрыт в прокси-сервере Vercel.
     const PROXY_URL = '/api/vercel-proxy';
 
@@ -422,7 +422,7 @@
         statusElement.style.opacity = '0';
       }, 3000);
     }
-    
+
     function toggleLoader(buttonId, show) {
       const button = document.getElementById(buttonId);
       if (show) {
@@ -433,7 +433,7 @@
         button.classList.remove('loading');
       }
     }
-    
+
     // Функция для копирования текста в буфер обмена
     function copyToClipboard(elementId) {
       const textarea = document.getElementById(elementId);
@@ -466,7 +466,7 @@
                 combinedText += segDiv.textContent.trim() + '\n\n';
             });
         }
-        
+
         // Добавляем выбранные сегменты
         const selectedSegmentsList = document.getElementById('selectedSegments');
         if (selectedSegmentsList && selectedSegmentsList.innerHTML.trim() !== '') {
@@ -544,7 +544,7 @@
         throw error;
       }
     }
-    
+
     function populateNiches() {
       const select = document.getElementById('nicheSelect');
       niches.forEach(n => {
@@ -565,7 +565,7 @@
       btn.classList.add('active');
       selectedCaseType = type;
     }
-    
+
     function toggleCreativeLeadType(btn, type) {
       document.querySelectorAll('#creativeLeadTypes button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -587,8 +587,18 @@
 
     function clearAllData() {
       // Очистка полей ввода и textarea
-      document.querySelectorAll('input[type="text"], textarea').forEach(t => t.value = '');
-      
+      document.getElementById('nicheSelect').value = '';
+      document.getElementById('customNicheInput').value = '';
+      document.getElementById('customNicheURL').value = '';
+      document.getElementById('customSegment').value = '';
+      document.getElementById('customPain').value = '';
+      document.getElementById('caseOutput').value = '';
+      document.getElementById('funnelOutput').value = '';
+      document.getElementById('socialMediaOutput').value = '';
+      document.getElementById('creativeLeadTitle').value = '';
+      document.getElementById('creativeLeadOutput').value = '';
+      document.getElementById('strategicLeadOutput').value = '';
+
       // Очистка выбранных элементов
       document.getElementById('selectedNiches').innerHTML = '';
       document.getElementById('selectedSegments').innerHTML = '';
@@ -600,7 +610,7 @@
 
       // Сброс активных кнопок
       document.querySelectorAll('.case-buttons button').forEach(b => b.classList.remove('active'));
-      
+
       // Сброс массивов
       selectedNichesArr.length = 0;
       selectedSegmentsArr.length = 0;
@@ -612,7 +622,7 @@
 
       // Скрываем стратегический блок лид-магнитов
       document.getElementById('strategicLeadBlock').style.display = 'none';
-      
+
       showStatusMessage('Все данные очищены!');
     }
 
@@ -629,7 +639,7 @@
       toggleLoader('generateSegmentsBtn', true);
       const prompt = `Сгенерируй 7-10 максимально широких и разнообразных сегментов целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, интересы, поведение и психографику. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами. Обязательно в начале каждого блока укажи его краткое название, например: "### 1. "Название сегмента" - Краткое описание".`;
       const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
-      
+
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
         const segments = resultText.split('###').filter(s => s.trim() !== '');
@@ -673,11 +683,9 @@
           const div = document.createElement('div');
           div.className = 'generated-pain';
           div.textContent = pain.trim();
+          // Теперь передаем в функцию addPainToSelected полный текст боли
           div.onclick = () => {
-            const match = pain.trim().match(/^"([^"]+)"/);
-            // Используем короткое название для добавления в массив
-            const shortName = match ? match[1] : `Боль ${painsList.children.length}`;
-            addPainToSelected(shortName, div);
+            addPainToSelected(div.textContent.trim(), div);
           };
           painsList.appendChild(div);
         });
@@ -704,7 +712,7 @@
       const input = document.getElementById('customPain');
       const val = input.value.trim();
       if (!val) return;
-      addPainToSelected(val); // Передаем короткое название
+      addPainToSelected(val);
       input.value = '';
     }
 
@@ -735,29 +743,30 @@
       }
     }
 
-    // Измененная функция, теперь она принимает короткое название
-    function addPainToSelected(shortName, element) {
-      if (selectedPainsArr.includes(shortName)) {
+    // Измененная функция, теперь она принимает полный текст боли
+    function addPainToSelected(painText, element) {
+      if (selectedPainsArr.includes(painText)) {
         showStatusMessage('Эта боль уже выбрана!');
         return;
       }
       const selBtn = document.createElement('button');
-      selBtn.textContent = shortName;
+      // Отображаем усеченный текст для кнопки, но сохраняем полный
+      selBtn.textContent = painText.substring(0, 30) + '...';
       selBtn.className = 'selected-item-btn';
       selBtn.onclick = () => {
           selectedPains.removeChild(selBtn);
-          const index = selectedPainsArr.indexOf(shortName);
+          const index = selectedPainsArr.indexOf(painText);
           if (index > -1) selectedPainsArr.splice(index, 1);
           if (element) {
             element.classList.remove('selected');
           }
       };
       selectedPains.appendChild(selBtn);
-      selectedPainsArr.push(shortName); // Добавляем в массив короткое название
+      selectedPainsArr.push(painText); // Добавляем в массив полный текст
       if (element) {
         element.classList.add('selected');
       }
-      showStatusMessage(`"${shortName}" добавлен в выбранные боли.`);
+      showStatusMessage(`"${painText.substring(0, 30)}..." добавлен в выбранные боли.`);
       if (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
           document.getElementById('strategicLeadBlock').style.display = 'block';
       }
@@ -822,7 +831,7 @@
       selectedNichesDom.appendChild(btn);
       document.getElementById('customNicheURL').value = '';
     }
-    
+
     async function generateCreativeLead() {
       const leadTitle = document.getElementById('creativeLeadTitle').value.trim();
       if (!leadTitle || !selectedCreativeLeadType) {
@@ -832,7 +841,7 @@
       toggleLoader('generateCreativeLeadBtn', true);
       const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedCreativeLeadType}" с названием "${leadTitle}". Опиши каждую идею с деталями и прогнозируемыми результатами.`;
       const systemPrompt = 'Ты - креативный маркетолог, который придумывает яркие и привлекательные идеи для лид-магнитов. Ты способен работать с любыми, даже самыми нестандартными запросами.';
-      
+
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
         document.getElementById('creativeLeadOutput').value = resultText;
@@ -852,7 +861,7 @@
       toggleLoader('generateStrategicLeadBtn', true);
       const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedStrategicLeadType}". Эти лид-магниты должны решать боли (${selectedPainsArr.join(', ')}) и быть нацелены на сегменты (${selectedSegmentsArr.join(', ')}) в нишах: ${selectedNichesArr.join(', ')}. Опиши каждую идею с деталями и прогнозируемыми результатами.`;
       const systemPrompt = 'Ты - эксперт по лидогенерации, который придумывает ценные и привлекательные материалы для клиентов.';
-      
+
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
         document.getElementById('strategicLeadOutput').value = resultText;
