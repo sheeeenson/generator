@@ -188,6 +188,11 @@
       border-radius: 6px;
       cursor: pointer;
       border: none;
+      overflow-wrap: break-word; /* Добавлено, чтобы текст переносился */
+      word-break: break-all;
+      white-space: normal;
+      height: auto;
+      max-width: 100%;
     }
     .selected-item-btn:hover {
       background: #ddd;
@@ -651,7 +656,7 @@
           div.onclick = () => {
             const match = seg.trim().match(/^[^"]+"([^"]+)"/);
             const shortName = match ? match[1] : `Сегмент ${segmentsList.children.length}`;
-            addSegmentToSelected(shortName, div);
+            addSegmentToSelected(div.textContent.trim(), div);
           };
           segmentsList.appendChild(div);
         });
@@ -737,7 +742,7 @@
       if (element) {
         element.classList.add('selected');
       }
-      showStatusMessage(`"${seg}" добавлен в выбранные сегменты.`);
+      showStatusMessage(`"${seg.substring(0, 30)}..." добавлен в выбранные сегменты.`);
       if (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
           document.getElementById('strategicLeadBlock').style.display = 'block';
       }
