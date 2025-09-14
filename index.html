@@ -160,10 +160,20 @@
       margin-top: 10px;
     }
     .generated-segment {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .generated-segment:hover {
+      background-color: #e0e0e0;
+    }
+    .generated-segment.selected {
+      border-color: #28a745;
+      background-color: #d4edda;
     }
     .selected-items { 
       display: flex; 
@@ -187,22 +197,6 @@
       color: #fff;
     }
     
-    .detail-btn {
-      background: #28a745;
-      color: #fff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-
-    .detail-btn:hover {
-      background: #218838;
-    }
-
     textarea { 
       resize: vertical; 
       margin-top: 15px; 
@@ -273,20 +267,13 @@
     <!-- Блок генерации сегментов -->
     <div class="block">
       <h2>Генерация сегментов ЦА</h2>
-      <label>Кликните по сегменту, чтобы добавить его в список для генерации кейсов:</label>
+      <label>Кликните по блоку, чтобы добавить его в список для генерации кейсов:</label>
       <div id="segmentsList" class="generated-list"></div>
       <button id="generateSegmentsBtn" class="generate-btn" onclick="generateSegments()">Сгенерировать сегменты</button>
       <label for="customSegment" style="margin-top:20px;">Или добавьте свой сегмент:</label>
       <input type="text" id="customSegment" placeholder="Добавьте свой сегмент" style="margin-top:10px;"/>
       <button class="btn" onclick="addCustomSegment()">Добавить сегмент</button>
       <div id="selectedSegments" class="selected-items"></div>
-
-      <hr style="margin-top: 20px; border: 0; border-top: 1px solid #ccc;">
-      
-      <label style="margin-top:20px;">Получить подробный отчет по всем выбранным сегментам:</label>
-      <button id="generateDetailedReportBtn" class="generate-btn" onclick="generateDetailedReport()">Сгенерировать подробный отчет</button>
-      <textarea id="detailedSegmentsOutput" rows="10" placeholder="Здесь будет подробный отчет по сегментам"></textarea>
-      <button class="save-btn" onclick="copyToClipboard('detailedSegmentsOutput')">Скопировать</button>
     </div>
     
     <!-- Новый блок: Боли и фрустрации -->
@@ -421,7 +408,6 @@
     // Новая функция для копирования всего контента
     function copyAllBlocks() {
         const outputs = [
-            { id: 'detailedSegmentsOutput', title: 'Подробный отчет по сегментам' },
             { id: 'caseOutput', title: 'Кейсы' },
             { id: 'funnelOutput', title: 'Воронки AIDA' },
             { id: 'socialMediaOutput', title: 'Идеи для контента' },
@@ -429,6 +415,24 @@
         ];
 
         let combinedText = '';
+
+        // Добавляем сгенерированные сегменты
+        const segmentsList = document.getElementById('segmentsList');
+        if (segmentsList && segmentsList.innerHTML.trim() !== '') {
+            combinedText += `\n--- Сгенерированные сегменты ---\n\n`;
+            segmentsList.querySelectorAll('.generated-segment').forEach(segDiv => {
+                combinedText += segDiv.textContent.trim() + '\n\n';
+            });
+        }
+        
+        // Добавляем выбранные сегменты
+        const selectedSegmentsList = document.getElementById('selectedSegments');
+        if (selectedSegmentsList && selectedSegmentsList.innerHTML.trim() !== '') {
+            combinedText += `\n--- Выбранные сегменты для генерации ---\n\n`;
+            selectedSegmentsList.querySelectorAll('.selected-item-btn').forEach(segBtn => {
+                combinedText += segBtn.textContent.trim() + '\n';
+            });
+        }
 
         outputs.forEach(output => {
             const textarea = document.getElementById(output.id);
@@ -553,29 +557,23 @@
         return;
       }
       toggleLoader('generateSegmentsBtn', true);
-      const prompt = `Сгенерируй 7-10 максимально широких и разнообразных сегментов целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Проанализируй демографию, интересы, поведение и психографику. Включи не только очевидные, но и нестандартные, "экзотические" сегменты. Для каждого сегмента используй формат "Название сегмента - Краткое описание".`;
+      const prompt = `Сгенерируй 7-10 максимально широких и разнообразных сегментов целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, интересы, поведение и психографику. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами. Обязательно в начале каждого блока укажи его краткое название, например: "### 1. "Название сегмента" - Краткое описание".`;
       const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
       
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        const segments = resultText.split('\n').filter(s => s.trim() !== '');
+        const segments = resultText.split('###').filter(s => s.trim() !== '');
         segmentsList.innerHTML = '';
         segments.forEach(seg => {
           const div = document.createElement('div');
           div.className = 'generated-segment';
-
-          const btn = document.createElement('button');
-          btn.textContent = seg;
-          btn.className = 'selected-item-btn';
-          btn.onclick = () => addSegmentToSelected(seg);
-          div.appendChild(btn);
-
-          const detailBtn = document.createElement('button');
-          detailBtn.textContent = 'Подробный анализ';
-          detailBtn.className = 'detail-btn';
-          detailBtn.onclick = () => showDetailedSegmentReport(seg.split(' - ')[0]); // Используем только название до дефиса
-          div.appendChild(detailBtn);
-          
+          div.textContent = seg.trim();
+          div.onclick = () => {
+            const match = seg.trim().match(/^[^"]+"([^"]+)"/);
+            const shortName = match ? match[1] : `Сегмент ${segmentsList.children.length}`;
+            addSegmentToSelected(shortName);
+            div.classList.add('selected');
+          };
           segmentsList.appendChild(div);
         });
         showStatusMessage('Сегменты успешно сгенерированы!');
@@ -583,52 +581,6 @@
         console.error("Failed to generate segments:", error);
       } finally {
         toggleLoader('generateSegmentsBtn', false);
-      }
-    }
-
-    async function showDetailedSegmentReport(segmentName) {
-      if (!segmentName) return;
-      
-      // Проверяем, есть ли уже такое поле. Если нет, создаем
-      let outputArea = document.getElementById(`detailed-report-${segmentName}`);
-      if (!outputArea) {
-          outputArea = document.createElement('textarea');
-          outputArea.id = `detailed-report-${segmentName}`;
-          outputArea.rows = '10';
-          outputArea.placeholder = 'Загрузка подробного анализа...';
-          document.getElementById('detailedSegmentsOutput').parentNode.insertBefore(outputArea, document.getElementById('detailedSegmentsOutput'));
-      }
-      
-      const prompt = `Сгенерируй детальный анализ целевой аудитории для сегмента: "${segmentName}" в нишах ${selectedNichesArr.join(', ')}. Предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, боли, интересы, поведение и примерный процент от общей аудитории. Описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами.`;
-      const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
-      
-      try {
-        outputArea.value = 'Загрузка подробного анализа...';
-        const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        outputArea.value = resultText;
-        showStatusMessage(`Подробный анализ для сегмента "${segmentName}" готов!`);
-      } catch (error) {
-        outputArea.value = `Ошибка загрузки для сегмента "${segmentName}". Пожалуйста, попробуйте снова.`;
-      }
-    }
-
-
-    async function generateDetailedReport() {
-      if (selectedSegmentsArr.length === 0) {
-        showStatusMessage('Сначала выберите сегменты для анализа!');
-        return;
-      }
-      toggleLoader('generateDetailedReportBtn', true);
-      const prompt = `Сгенерируй детальный анализ целевой аудитории для следующих сегментов: ${selectedSegmentsArr.join(', ')}. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, боли, интересы, поведение и примерный процент от общей аудитории. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами.`;
-      const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
-      try {
-        const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        document.getElementById('detailedSegmentsOutput').value = resultText;
-        showStatusMessage('Детальный отчет по сегментам успешно сгенерирован!');
-      } catch (error) {
-        document.getElementById('detailedSegmentsOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
-      } finally {
-        toggleLoader('generateDetailedReportBtn', false);
       }
     }
 
