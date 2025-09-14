@@ -324,20 +324,34 @@
         <button class="save-btn" onclick="copyToClipboard('socialMediaOutput')">Скопировать</button>
     </div>
 
-    <!-- Блок лид-магнитов -->
+    <!-- Новый независимый блок: Креативные лид-магниты -->
     <div class="block">
-      <h2>Лид-магниты</h2>
-      <label for="leadTitle">Название кликбейтного лид-магнита:</label>
-      <input type="text" id="leadTitle" placeholder="Придумайте кликбейтное название...">
-      <label>Выберите формат лид-магнита:</label>
-      <div class="case-buttons" id="leadTypes">
-        <button class="btn" onclick="toggleLeadType(this, 'гайд')">Гайд</button>
-        <button class="btn" onclick="toggleLeadType(this, 'чек-лист')">Чек-лист</button>
-        <button class="btn" onclick="toggleLeadType(this, 'мини-курс')">Мини-курс</button>
+      <h2>Креативные лид-магниты</h2>
+      <label for="creativeLeadTitle">Кликбейтное название лид-магнита (независимо от ниши):</label>
+      <input type="text" id="creativeLeadTitle" placeholder="Введите название, например: 'Как стать пусечкой?'">
+      <label>Выберите формат:</label>
+      <div class="case-buttons" id="creativeLeadTypes">
+        <button class="btn" onclick="toggleCreativeLeadType(this, 'гайд')">Гайд</button>
+        <button class="btn" onclick="toggleCreativeLeadType(this, 'чек-лист')">Чек-лист</button>
+        <button class="btn" onclick="toggleCreativeLeadType(this, 'мини-курс')">Мини-курс</button>
       </div>
-      <button id="generateLeadMagnetsBtn" class="generate-btn" onclick="generateLeadMagnets()">Сгенерировать лид-магнит</button>
-      <textarea id="leadOutput" rows="6" placeholder="Здесь будет результат генерации"></textarea>
-      <button class="save-btn" onclick="copyToClipboard('leadOutput')">Скопировать</button>
+      <button id="generateCreativeLeadBtn" class="generate-btn" onclick="generateCreativeLead()">Сгенерировать</button>
+      <textarea id="creativeLeadOutput" rows="6" placeholder="Здесь будет результат генерации креативных идей"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('creativeLeadOutput')">Скопировать</button>
+    </div>
+
+    <!-- Новый стратегический блок: Стратегические лид-магниты -->
+    <div class="block" id="strategicLeadBlock" style="display:none;">
+      <h2>Стратегические лид-магниты</h2>
+      <label>Выберите формат:</label>
+      <div class="case-buttons" id="strategicLeadTypes">
+        <button class="btn" onclick="toggleStrategicLeadType(this, 'гайд')">Гайд</button>
+        <button class="btn" onclick="toggleStrategicLeadType(this, 'чек-лист')">Чек-лист</button>
+        <button class="btn" onclick="toggleStrategicLeadType(this, 'мини-курс')">Мини-курс</button>
+      </div>
+      <button id="generateStrategicLeadBtn" class="generate-btn" onclick="generateStrategicLead()">Сгенерировать</button>
+      <textarea id="strategicLeadOutput" rows="6" placeholder="Здесь будет результат генерации стратегических идей"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('strategicLeadOutput')">Скопировать</button>
     </div>
     
     <!-- Кнопки внизу страницы -->
@@ -366,7 +380,8 @@
     const selectedSegmentsArr = [];
     const selectedPainsArr = [];
     let selectedCaseType = '';
-    let selectedLeadType = '';
+    let selectedCreativeLeadType = '';
+    let selectedStrategicLeadType = '';
     let selectedContentType = '';
     
     // API-ключ теперь скрыт в прокси-сервере Vercel.
@@ -411,7 +426,8 @@
             { id: 'caseOutput', title: 'Кейсы' },
             { id: 'funnelOutput', title: 'Воронки AIDA' },
             { id: 'socialMediaOutput', title: 'Идеи для контента' },
-            { id: 'leadOutput', title: 'Лид-магниты' }
+            { id: 'creativeLeadOutput', title: 'Креативные лид-магниты' },
+            { id: 'strategicLeadOutput', title: 'Стратегические лид-магниты' }
         ];
 
         let combinedText = '';
@@ -524,10 +540,16 @@
       selectedCaseType = type;
     }
     
-    function toggleLeadType(btn, type) {
-      document.querySelectorAll('#leadTypes button').forEach(b => b.classList.remove('active'));
+    function toggleCreativeLeadType(btn, type) {
+      document.querySelectorAll('#creativeLeadTypes button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      selectedLeadType = type;
+      selectedCreativeLeadType = type;
+    }
+
+    function toggleStrategicLeadType(btn, type) {
+      document.querySelectorAll('#strategicLeadTypes button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedStrategicLeadType = type;
     }
 
     function toggleContentType(btn, type) {
@@ -558,8 +580,12 @@
       selectedSegmentsArr.length = 0;
       selectedPainsArr.length = 0;
       selectedCaseType = '';
-      selectedLeadType = '';
+      selectedCreativeLeadType = '';
+      selectedStrategicLeadType = '';
       selectedContentType = '';
+
+      // Скрываем стратегический блок лид-магнитов
+      document.getElementById('strategicLeadBlock').style.display = 'none';
       
       showStatusMessage('Все данные очищены!');
     }
@@ -594,6 +620,8 @@
           segmentsList.appendChild(div);
         });
         showStatusMessage('Сегменты успешно сгенерированы!');
+        // Если сегменты сгенерированы, показываем стратегический блок
+        document.getElementById('strategicLeadBlock').style.display = 'block';
       } catch (error) {
         console.error("Failed to generate segments:", error);
       } finally {
@@ -625,6 +653,8 @@
           painsList.appendChild(div);
         });
         showStatusMessage('Боли успешно сгенерированы!');
+        // Если боли сгенерированы, показываем стратегический блок
+        document.getElementById('strategicLeadBlock').style.display = 'block';
       } catch (error) {
         console.error("Failed to generate pains:", error);
       } finally {
@@ -670,6 +700,7 @@
         element.classList.add('selected');
       }
       showStatusMessage(`"${seg}" добавлен в выбранные сегменты.`);
+      document.getElementById('strategicLeadBlock').style.display = (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) ? 'block' : 'none';
     }
 
     function addPainToSelected(pain, element) {
@@ -694,6 +725,7 @@
         element.classList.add('selected');
       }
       showStatusMessage(`"${pain}" добавлен в выбранные боли.`);
+      document.getElementById('strategicLeadBlock').style.display = (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) ? 'block' : 'none';
     }
 
     const selectedNichesDom = document.getElementById('selectedNiches');
@@ -756,35 +788,44 @@
       document.getElementById('customNicheURL').value = '';
     }
     
-    async function generateLeadMagnets() {
-      const leadTitle = document.getElementById('leadTitle').value.trim();
-      if (!leadTitle || !selectedLeadType) {
+    async function generateCreativeLead() {
+      const leadTitle = document.getElementById('creativeLeadTitle').value.trim();
+      if (!leadTitle || !selectedCreativeLeadType) {
         showStatusMessage('Выберите название и формат лид-магнита!');
         return;
       }
-      toggleLoader('generateLeadMagnetsBtn', true);
-      let prompt;
-      let systemPrompt;
-
-      // Проверяем, выбраны ли ниша, сегмент и боль
-      if (selectedNichesArr.length > 0 && selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
-        // Логика для генерации с привязкой к контексту
-        prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Эти лид-магниты должны решать боли (${selectedPainsArr.join(', ')}) и быть нацелены на сегменты (${selectedSegmentsArr.join(', ')}) в нишах: ${selectedNichesArr.join(', ')}. Опиши каждую идею с деталями и прогнозируемыми результатами.`;
-        systemPrompt = 'Ты - эксперт по лидогенерации, который придумывает ценные и привлекательные материалы для клиентов.';
-      } else {
-        // Логика для независимой генерации
-        prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Опиши каждую идею с деталями и прогнозируемыми результатами.`;
-        systemPrompt = 'Ты - креативный маркетолог, который придумывает яркие и привлекательные идеи для лид-магнитов. Ты способен работать с любыми, даже самыми нестандартными запросами.';
-      }
+      toggleLoader('generateCreativeLeadBtn', true);
+      const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedCreativeLeadType}" с названием "${leadTitle}". Опиши каждую идею с деталями и прогнозируемыми результатами.`;
+      const systemPrompt = 'Ты - креативный маркетолог, который придумывает яркие и привлекательные идеи для лид-магнитов. Ты способен работать с любыми, даже самыми нестандартными запросами.';
       
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        document.getElementById('leadOutput').value = resultText;
-        showStatusMessage('Лид-магниты успешно сгенерированы!');
+        document.getElementById('creativeLeadOutput').value = resultText;
+        showStatusMessage('Креативные лид-магниты успешно сгенерированы!');
       } catch (error) {
-        document.getElementById('leadOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+        document.getElementById('creativeLeadOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
       } finally {
-        toggleLoader('generateLeadMagnetsBtn', false);
+        toggleLoader('generateCreativeLeadBtn', false);
+      }
+    }
+
+    async function generateStrategicLead() {
+      if (selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0 || !selectedStrategicLeadType) {
+        showStatusMessage('Выберите нишу, сегмент, боль и формат!');
+        return;
+      }
+      toggleLoader('generateStrategicLeadBtn', true);
+      const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedStrategicLeadType}". Эти лид-магниты должны решать боли (${selectedPainsArr.join(', ')}) и быть нацелены на сегменты (${selectedSegmentsArr.join(', ')}) в нишах: ${selectedNichesArr.join(', ')}. Опиши каждую идею с деталями и прогнозируемыми результатами.`;
+      const systemPrompt = 'Ты - эксперт по лидогенерации, который придумывает ценные и привлекательные материалы для клиентов.';
+      
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        document.getElementById('strategicLeadOutput').value = resultText;
+        showStatusMessage('Стратегические лид-магниты успешно сгенерированы!');
+      } catch (error) {
+        document.getElementById('strategicLeadOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+      } finally {
+        toggleLoader('generateStrategicLeadBtn', false);
       }
     }
 
