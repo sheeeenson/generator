@@ -290,6 +290,20 @@
       <button class="btn" onclick="confirmCustomNicheURL()">Подтвердить URL/ссылку</button>
     </div>
 
+    <!-- Новый стратегический блок: Стратегические лид-магниты -->
+    <div class="block" id="strategicLeadBlock" style="display:none;">
+      <h2>Стратегические лид-магниты</h2>
+      <label>Выберите формат:</label>
+      <div class="case-buttons" id="strategicLeadTypes">
+        <button class="btn" onclick="toggleStrategicLeadType(this, 'гайд')">Гайд</button>
+        <button class="btn" onclick="toggleStrategicLeadType(this, 'чек-лист')">Чек-лист</button>
+        <button class="btn" onclick="toggleStrategicLeadType(this, 'мини-курс')">Мини-курс</button>
+      </div>
+      <button id="generateStrategicLeadBtn" class="generate-btn" onclick="generateStrategicLead()">Сгенерировать</button>
+      <textarea id="strategicLeadOutput" rows="6" placeholder="Здесь будет результат генерации стратегических идей"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('strategicLeadOutput')">Скопировать</button>
+    </div>
+
     <!-- Блок генерации сегментов -->
     <div class="block">
       <h2>Генерация сегментов ЦА</h2>
@@ -348,20 +362,6 @@
         <button id="generateSocialMediaBtn" class="generate-btn" onclick="generateSocialMediaContent()">Сгенерировать идеи для контента</button>
         <textarea id="socialMediaOutput" rows="10" placeholder="Здесь будет результат генерации идей для контента"></textarea>
         <button class="save-btn" onclick="copyToClipboard('socialMediaOutput')">Скопировать</button>
-    </div>
-
-    <!-- Новый стратегический блок: Стратегические лид-магниты -->
-    <div class="block" id="strategicLeadBlock" style="display:none;">
-      <h2>Стратегические лид-магниты</h2>
-      <label>Выберите формат:</label>
-      <div class="case-buttons" id="strategicLeadTypes">
-        <button class="btn" onclick="toggleStrategicLeadType(this, 'гайд')">Гайд</button>
-        <button class="btn" onclick="toggleStrategicLeadType(this, 'чек-лист')">Чек-лист</button>
-        <button class="btn" onclick="toggleStrategicLeadType(this, 'мини-курс')">Мини-курс</button>
-      </div>
-      <button id="generateStrategicLeadBtn" class="generate-btn" onclick="generateStrategicLead()">Сгенерировать</button>
-      <textarea id="strategicLeadOutput" rows="6" placeholder="Здесь будет результат генерации стратегических идей"></textarea>
-      <button class="save-btn" onclick="copyToClipboard('strategicLeadOutput')">Скопировать</button>
     </div>
 
     <!-- Новый независимый блок: Креативные лид-магниты -->
@@ -647,7 +647,9 @@
         });
         showStatusMessage('Сегменты успешно сгенерированы!');
         // Если сегменты сгенерированы, показываем стратегический блок
-        document.getElementById('strategicLeadBlock').style.display = 'block';
+        if (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
+          document.getElementById('strategicLeadBlock').style.display = 'block';
+        }
       } catch (error) {
         console.error("Failed to generate segments:", error);
       } finally {
@@ -673,14 +675,16 @@
           div.textContent = pain.trim();
           div.onclick = () => {
             const match = pain.trim().match(/^"([^"]+)"/);
+            // Используем короткое название для добавления в массив
             const shortName = match ? match[1] : `Боль ${painsList.children.length}`;
             addPainToSelected(shortName, div);
           };
           painsList.appendChild(div);
         });
         showStatusMessage('Боли успешно сгенерированы!');
-        // Если боли сгенерированы, показываем стратегический блок
-        document.getElementById('strategicLeadBlock').style.display = 'block';
+        if (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
+          document.getElementById('strategicLeadBlock').style.display = 'block';
+        }
       } catch (error) {
         console.error("Failed to generate pains:", error);
       } finally {
@@ -700,7 +704,7 @@
       const input = document.getElementById('customPain');
       const val = input.value.trim();
       if (!val) return;
-      addPainToSelected(val);
+      addPainToSelected(val); // Передаем короткое название
       input.value = '';
     }
 
@@ -726,32 +730,37 @@
         element.classList.add('selected');
       }
       showStatusMessage(`"${seg}" добавлен в выбранные сегменты.`);
-      document.getElementById('strategicLeadBlock').style.display = (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) ? 'block' : 'none';
+      if (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
+          document.getElementById('strategicLeadBlock').style.display = 'block';
+      }
     }
 
-    function addPainToSelected(pain, element) {
-      if (selectedPainsArr.includes(pain)) {
+    // Измененная функция, теперь она принимает короткое название
+    function addPainToSelected(shortName, element) {
+      if (selectedPainsArr.includes(shortName)) {
         showStatusMessage('Эта боль уже выбрана!');
         return;
       }
       const selBtn = document.createElement('button');
-      selBtn.textContent = pain;
+      selBtn.textContent = shortName;
       selBtn.className = 'selected-item-btn';
       selBtn.onclick = () => {
           selectedPains.removeChild(selBtn);
-          const index = selectedPainsArr.indexOf(pain);
+          const index = selectedPainsArr.indexOf(shortName);
           if (index > -1) selectedPainsArr.splice(index, 1);
           if (element) {
             element.classList.remove('selected');
           }
       };
       selectedPains.appendChild(selBtn);
-      selectedPainsArr.push(pain);
+      selectedPainsArr.push(shortName); // Добавляем в массив короткое название
       if (element) {
         element.classList.add('selected');
       }
-      showStatusMessage(`"${pain}" добавлен в выбранные боли.`);
-      document.getElementById('strategicLeadBlock').style.display = (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) ? 'block' : 'none';
+      showStatusMessage(`"${shortName}" добавлен в выбранные боли.`);
+      if (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
+          document.getElementById('strategicLeadBlock').style.display = 'block';
+      }
     }
 
     const selectedNichesDom = document.getElementById('selectedNiches');
