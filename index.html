@@ -159,7 +159,7 @@
     .generated-list { 
       margin-top: 10px;
     }
-    .generated-segment {
+    .generated-segment, .generated-pain {
       padding: 15px;
       margin-bottom: 10px;
       border: 1px solid #ccc;
@@ -168,10 +168,10 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
-    .generated-segment:hover {
+    .generated-segment:hover, .generated-pain:hover {
       background-color: #e0e0e0;
     }
-    .generated-segment.selected {
+    .generated-segment.selected, .generated-pain.selected {
       border-color: #28a745;
       background-color: #d4edda;
     }
@@ -434,6 +434,24 @@
             });
         }
 
+        // Добавляем сгенерированные боли
+        const painsList = document.getElementById('painsList');
+        if (painsList && painsList.innerHTML.trim() !== '') {
+            combinedText += `\n--- Сгенерированные боли и фрустрации ---\n\n`;
+            painsList.querySelectorAll('.generated-pain').forEach(painDiv => {
+                combinedText += painDiv.textContent.trim() + '\n\n';
+            });
+        }
+
+        // Добавляем выбранные боли
+        const selectedPainsList = document.getElementById('selectedPains');
+        if (selectedPainsList && selectedPainsList.innerHTML.trim() !== '') {
+            combinedText += `\n--- Выбранные боли и фрустрации для генерации ---\n\n`;
+            selectedPainsList.querySelectorAll('.selected-item-btn').forEach(painBtn => {
+                combinedText += painBtn.textContent.trim() + '\n';
+            });
+        }
+
         outputs.forEach(output => {
             const textarea = document.getElementById(output.id);
             if (textarea && textarea.value.trim() !== '') {
@@ -571,8 +589,7 @@
           div.onclick = () => {
             const match = seg.trim().match(/^[^"]+"([^"]+)"/);
             const shortName = match ? match[1] : `Сегмент ${segmentsList.children.length}`;
-            addSegmentToSelected(shortName);
-            div.classList.add('selected');
+            addSegmentToSelected(shortName, div);
           };
           segmentsList.appendChild(div);
         });
@@ -590,18 +607,22 @@
         return;
       }
       toggleLoader('generatePainsBtn', true);
-      const prompt = `Проведи глубокий анализ и сгенерируй 7-10 болей и фрустраций для целевой аудитории в следующих нишах: ${selectedNichesArr.join(', ')}. Для каждой боли предоставь детальное описание, объясни ее причины, как она проявляется в жизни клиента и какие "триггеры" ее вызывают. Представь это как часть полноценного маркетингового исследования.`;
+      const prompt = `Проведи глубокий анализ и сгенерируй 7-10 болей и фрустраций для целевой аудитории в следующих нишах: ${selectedNichesArr.join(', ')}. Для каждой боли предоставь детальное описание в одном связном абзаце, который объясняет ее причины, как она проявляется и какие "триггеры" ее вызывают. Обязательно начинай каждый абзац с "### Название боли".`;
       const systemPrompt = 'Ты - маркетолог-аналитик, который определяет боли и проблемы целевой аудитории.';
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        const pains = resultText.split('\n').filter(s => s.trim() !== '');
+        const pains = resultText.split('###').filter(s => s.trim() !== '');
         painsList.innerHTML = '';
         pains.forEach(pain => {
-          const btn = document.createElement('button');
-          btn.textContent = pain;
-          btn.className = 'selected-item-btn';
-          btn.onclick = () => addPainToSelected(pain);
-          painsList.appendChild(btn);
+          const div = document.createElement('div');
+          div.className = 'generated-pain';
+          div.textContent = pain.trim();
+          div.onclick = () => {
+            const match = pain.trim().match(/^"([^"]+)"/);
+            const shortName = match ? match[1] : `Боль ${painsList.children.length}`;
+            addPainToSelected(shortName, div);
+          };
+          painsList.appendChild(div);
         });
         showStatusMessage('Боли успешно сгенерированы!');
       } catch (error) {
@@ -627,7 +648,7 @@
       input.value = '';
     }
 
-    function addSegmentToSelected(seg) {
+    function addSegmentToSelected(seg, element) {
       if (selectedSegmentsArr.includes(seg)) {
         showStatusMessage('Этот сегмент уже выбран!');
         return;
@@ -639,13 +660,19 @@
           selectedSegments.removeChild(selBtn);
           const index = selectedSegmentsArr.indexOf(seg);
           if (index > -1) selectedSegmentsArr.splice(index, 1);
+          if (element) {
+            element.classList.remove('selected');
+          }
       };
       selectedSegments.appendChild(selBtn);
       selectedSegmentsArr.push(seg);
+      if (element) {
+        element.classList.add('selected');
+      }
       showStatusMessage(`"${seg}" добавлен в выбранные сегменты.`);
     }
 
-    function addPainToSelected(pain) {
+    function addPainToSelected(pain, element) {
       if (selectedPainsArr.includes(pain)) {
         showStatusMessage('Эта боль уже выбрана!');
         return;
@@ -657,9 +684,15 @@
           selectedPains.removeChild(selBtn);
           const index = selectedPainsArr.indexOf(pain);
           if (index > -1) selectedPainsArr.splice(index, 1);
+          if (element) {
+            element.classList.remove('selected');
+          }
       };
       selectedPains.appendChild(selBtn);
       selectedPainsArr.push(pain);
+      if (element) {
+        element.classList.add('selected');
+      }
       showStatusMessage(`"${pain}" добавлен в выбранные боли.`);
     }
 
