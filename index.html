@@ -758,13 +758,25 @@
     
     async function generateLeadMagnets() {
       const leadTitle = document.getElementById('leadTitle').value.trim();
-      if (!leadTitle || !selectedLeadType || selectedNichesArr.length === 0 || selectedSegmentsArr.length === 0 || selectedPainsArr.length === 0) {
-        showStatusMessage('Выберите нишу, сегмент, боль, введите название и выберите формат!');
+      if (!leadTitle || !selectedLeadType) {
+        showStatusMessage('Выберите название и формат лид-магнита!');
         return;
       }
       toggleLoader('generateLeadMagnetsBtn', true);
-      const prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Эти лид-магниты должны решать боли (${selectedPainsArr.join(', ')}) и быть нацелены на сегменты (${selectedSegmentsArr.join(', ')}) в нишах: ${selectedNichesArr.join(', ')}. Опиши каждую идею с деталями и прогнозируемыми результатами.`;
-      const systemPrompt = 'Ты - эксперт по лидогенерации, который придумывает ценные и привлекательные материалы для клиентов.';
+      let prompt;
+      let systemPrompt;
+
+      // Проверяем, выбраны ли ниша, сегмент и боль
+      if (selectedNichesArr.length > 0 && selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
+        // Логика для генерации с привязкой к контексту
+        prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Эти лид-магниты должны решать боли (${selectedPainsArr.join(', ')}) и быть нацелены на сегменты (${selectedSegmentsArr.join(', ')}) в нишах: ${selectedNichesArr.join(', ')}. Опиши каждую идею с деталями и прогнозируемыми результатами.`;
+        systemPrompt = 'Ты - эксперт по лидогенерации, который придумывает ценные и привлекательные материалы для клиентов.';
+      } else {
+        // Логика для независимой генерации
+        prompt = `Сгенерируй 3-5 идей лид-магнитов формата "${selectedLeadType}" с названием "${leadTitle}". Опиши каждую идею с деталями и прогнозируемыми результатами.`;
+        systemPrompt = 'Ты - креативный маркетолог, который придумывает яркие и привлекательные идеи для лид-магнитов. Ты способен работать с любыми, даже самыми нестандартными запросами.';
+      }
+      
       try {
         const resultText = await generateContentWithGemini(prompt, systemPrompt);
         document.getElementById('leadOutput').value = resultText;
