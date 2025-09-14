@@ -243,6 +243,32 @@
         font-size: 16px;
       }
     }
+
+    /* Стили для инвертированного блока */
+    .inverted-block {
+      background: #222;
+      color: #fff;
+      border-color: #444;
+    }
+
+    .inverted-block h2, .inverted-block label {
+      color: #fff;
+    }
+    
+    .inverted-block input, .inverted-block select, .inverted-block textarea {
+      background: #444;
+      color: #fff;
+      border-color: #666;
+    }
+
+    .inverted-block .btn {
+      background: #fff;
+      color: #222;
+    }
+
+    .inverted-block .btn:hover {
+      background: #ccc;
+    }
   </style>
 </head>
 <body>
@@ -324,22 +350,6 @@
         <button class="save-btn" onclick="copyToClipboard('socialMediaOutput')">Скопировать</button>
     </div>
 
-    <!-- Новый независимый блок: Креативные лид-магниты -->
-    <div class="block">
-      <h2>Креативные лид-магниты</h2>
-      <label for="creativeLeadTitle">Кликбейтное название лид-магнита (независимо от ниши):</label>
-      <input type="text" id="creativeLeadTitle" placeholder="Введите название, например: 'Как стать пусечкой?'">
-      <label>Выберите формат:</label>
-      <div class="case-buttons" id="creativeLeadTypes">
-        <button class="btn" onclick="toggleCreativeLeadType(this, 'гайд')">Гайд</button>
-        <button class="btn" onclick="toggleCreativeLeadType(this, 'чек-лист')">Чек-лист</button>
-        <button class="btn" onclick="toggleCreativeLeadType(this, 'мини-курс')">Мини-курс</button>
-      </div>
-      <button id="generateCreativeLeadBtn" class="generate-btn" onclick="generateCreativeLead()">Сгенерировать</button>
-      <textarea id="creativeLeadOutput" rows="6" placeholder="Здесь будет результат генерации креативных идей"></textarea>
-      <button class="save-btn" onclick="copyToClipboard('creativeLeadOutput')">Скопировать</button>
-    </div>
-
     <!-- Новый стратегический блок: Стратегические лид-магниты -->
     <div class="block" id="strategicLeadBlock" style="display:none;">
       <h2>Стратегические лид-магниты</h2>
@@ -352,6 +362,22 @@
       <button id="generateStrategicLeadBtn" class="generate-btn" onclick="generateStrategicLead()">Сгенерировать</button>
       <textarea id="strategicLeadOutput" rows="6" placeholder="Здесь будет результат генерации стратегических идей"></textarea>
       <button class="save-btn" onclick="copyToClipboard('strategicLeadOutput')">Скопировать</button>
+    </div>
+
+    <!-- Новый независимый блок: Креативные лид-магниты -->
+    <div class="block inverted-block">
+      <h2>Креативные лид-магниты</h2>
+      <label for="creativeLeadTitle">Кликбейтное название лид-магнита (независимо от ниши):</label>
+      <input type="text" id="creativeLeadTitle" placeholder="Введите название, например: 'Как стать пусечкой?'">
+      <label>Выберите формат:</label>
+      <div class="case-buttons" id="creativeLeadTypes">
+        <button class="btn" onclick="toggleCreativeLeadType(this, 'гайд')">Гайд</button>
+        <button class="btn" onclick="toggleCreativeLeadType(this, 'чек-лист')">Чек-лист</button>
+        <button class="btn" onclick="toggleCreativeLeadType(this, 'мини-курс')">Мини-курс</button>
+      </div>
+      <button id="generateCreativeLeadBtn" class="generate-btn" onclick="generateCreativeLead()">Сгенерировать</button>
+      <textarea id="creativeLeadOutput" rows="6" placeholder="Здесь будет результат генерации креативных идей"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('creativeLeadOutput')">Скопировать</button>
     </div>
     
     <!-- Кнопки внизу страницы -->
