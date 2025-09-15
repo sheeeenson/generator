@@ -6,6 +6,20 @@
   <title>Товарищ генератор</title>
   <!-- Фавикон в виде эмодзи-лампочки. Это позволяет встроить иконку прямо в HTML, не создавая отдельный файл. -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>">
+  
+  <!-- Добавляем мета-теги для PWA на iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Иконка для экрана "Домой" на iOS -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' ry='20' fill='white'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='90'>💡</text></svg>">
+  
+  <!-- Заголовок для "Домой" -->
+  <meta name="apple-mobile-web-app-title" content="Генератор">
+  
+  <!-- Манифест для Android и других платформ -->
+  <link rel="manifest" href="data:application/manifest+json,{'name':'Товарищ генератор','short_name':'Генератор','icons':[{'src':'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>💡</text></svg>','sizes':'any','type':'image/svg+xml'}],'display':'standalone'}">
+
   <style>
     /* Базовые стили для мобильных устройств (mobile-first approach) */
     body {
