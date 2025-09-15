@@ -369,7 +369,7 @@
       <button class="save-btn" onclick="copyToClipboard('funnelOutput')">Скопировать</button>
     </div>
 
-    <!-- Новый блок: Генерация контента для соцсетей -->
+    <!-- Блок генерации контента для соцсетей -->
     <div class="block">
         <h2>Генерация контента для соцсетей</h2>
         <label>Выберите тип контента:</label>
@@ -399,8 +399,27 @@
       <button class="save-btn" onclick="copyToClipboard('creativeLeadOutput')">Скопировать</button>
     </div>
 
+    <!-- Новый независимый блок: Супер-контент для соц. сетей -->
+    <div class="block inverted-block">
+      <h2>Супер-контент для соц. сетей</h2>
+      <label for="channelDescriptionInput">Введите вводные данные для генерации контента (темы, аудитория, настроение и т.д.):</label>
+      <textarea id="channelDescriptionInput" rows="4" placeholder="Например:
+- Тема: Как работать меньше и жить лучше.
+- Аудитория: IT-специалисты.
+- Настроение: Юмористическое, легкое, саркастичное."></textarea>
+      <label>Выберите формат:</label>
+      <div class="case-buttons" id="superContentTypeButtons">
+        <button class="btn" onclick="toggleSuperContentType(this, 'Пост')">Пост</button>
+        <button class="btn" onclick="toggleSuperContentType(this, 'Лонгрид')">Лонгрид</button>
+        <button class="btn" onclick="toggleSuperContentType(this, 'Сценарий рилс')">Сценарий рилс</button>
+      </div>
+      <button id="generateSuperContentBtn" class="generate-btn" onclick="generateSuperContent()">Сгенерировать</button>
+      <textarea id="superContentOutput" rows="6" placeholder="Здесь будет результат генерации супер-контента"></textarea>
+      <button class="save-btn" onclick="copyToClipboard('superContentOutput')">Скопировать</button>
+    </div>
+
     <!-- Кнопки внизу страницы -->
-    <button class="save-btn" onclick="copyAllBlocks()">Скопировать всё</button>
+    <button class="save-btn" onclick="copyAllBlocks()">Копировать всё</button>
     <button class="clear-btn" onclick="clearAllData()">Очистить всё</button>
     <div id="status-message" class="status-message"></div>
   </div>
@@ -408,7 +427,7 @@
   <script>
     const niches = [
       {category: 'Хорека', businesses: ["Рестораны","Кафе","Бары","Кофейни","Пиццерии","Фастфуд","Столовые","Фудтраки","Веганские/вегетарианские кафе","Доставка еды","Кондитерские","Кейтеринг","Суши-бары","Бранчи","Fine dining","Кулинарные мастер-классы"]},
-      {category: 'Красота и здоровье', businesses: ["Парикмахерские","Барбершоты","Салоны маникюра","Салоны красоты","СПА-салоны","Косметологические клиники","Фитнес-клубы","Йога-студии","Массажные салоны","Диетологи","Психотерапевты","Стоматология","Медицинские клиники","Онлайн-тренировки","Wellness-retreats","Натуральные БАДы"]},
+      {category: 'Красота и здоровье', businesses: ["Парикмахерские","Барбершопы","Салоны маникюра","Салоны красоты","СПА-салоны","Косметологические клиники","Фитнес-клубы","Йога-студии","Массажные салоны","Диетологи","Психотерапевты","Стоматология","Медицинские клиники","Онлайн-тренировки","Wellness-retreats","Натуральные БАДы"]},
       {category: 'Образование', businesses: ["Школы","Детские сады","Онлайн-курсы","Языковые школы","Университеты","Учебные центры","Тренинговые компании","Репетиторы","IT-академии","STEM-курсы","Корпоративное обучение"]},
       {category: 'Недвижимость', businesses: ["Агентства недвижимости","Застройщики","Сервисы аренды","Коворкинги","Апартаменты","Отели"]},
       {category: 'Ритейл', businesses: ["Супермаркеты","Магазины одежды","Магазины обуви","Электроника","Онлайн-магазины","Бутики","Спортивные товары","Товары для дома","Канцелярия","Книги"]},
@@ -428,6 +447,7 @@
     let selectedCreativeLeadType = '';
     let selectedStrategicLeadType = '';
     let selectedContentType = '';
+    let selectedSuperContentType = ''; // Новый глобальный параметр для супер-контента
 
     // API-ключ теперь скрыт в прокси-сервере Vercel.
     const PROXY_URL = '/api/vercel-proxy';
@@ -472,7 +492,8 @@
             { id: 'funnelOutput', title: 'Воронки AIDA' },
             { id: 'socialMediaOutput', title: 'Идеи для контента' },
             { id: 'creativeLeadOutput', title: 'Креативные лид-магниты' },
-            { id: 'strategicLeadOutput', title: 'Стратегические лид-магниты' }
+            { id: 'strategicLeadOutput', title: 'Стратегические лид-магниты' },
+            { id: 'superContentOutput', title: 'Супер-контент для соц. сетей' }
         ];
 
         let combinedText = '';
@@ -603,6 +624,13 @@
         selectedContentType = type;
     }
 
+    // Новая функция для выбора формата супер-контента
+    function toggleSuperContentType(btn, type) {
+      document.querySelectorAll('#superContentTypeButtons button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedSuperContentType = type;
+    }
+
 
     function clearAllData() {
       // Очистка полей ввода и textarea
@@ -617,6 +645,8 @@
       document.getElementById('creativeLeadTitle').value = '';
       document.getElementById('creativeLeadOutput').value = '';
       document.getElementById('strategicLeadOutput').value = '';
+      document.getElementById('channelDescriptionInput').value = '';
+      document.getElementById('superContentOutput').value = '';
 
       // Очистка выбранных элементов
       document.getElementById('selectedNiches').innerHTML = '';
@@ -638,6 +668,7 @@
       selectedCreativeLeadType = '';
       selectedStrategicLeadType = '';
       selectedContentType = '';
+      selectedSuperContentType = ''; // Сброс новой переменной
 
       // Скрываем стратегический блок лид-магнитов
       document.getElementById('strategicLeadBlock').style.display = 'none';
@@ -971,6 +1002,30 @@
         toggleLoader('generateSocialMediaBtn', false);
       }
     }
+
+    // Новая функция для генерации супер-контента
+    async function generateSuperContent() {
+      const inputData = document.getElementById('channelDescriptionInput').value.trim();
+      if (!inputData || !selectedSuperContentType) {
+        showStatusMessage('Введите данные и выберите формат контента!');
+        return;
+      }
+      toggleLoader('generateSuperContentBtn', true);
+
+      const prompt = `Сгенерируй 3-5 идей для полезно-развлекательного контента формата "${selectedSuperContentType}". Контент должен быть предназначен для канала на основе следующих вводных данных: "${inputData}". Учитывай, что контент должен быть полезным, но при этом иметь юмористический, легкий и развлекательный тон, соответствующий описанию. Опиши каждую идею, включая тему, структуру и примеры.`;
+      const systemPrompt = 'Ты — креативный SMM-щик, который умеет создавать контент, сочетающий пользу, юмор и развлечение, адаптируясь под уникальный тон канала. Твоя задача — предложить идеи, которые не только информируют, но и увлекают аудиторию.';
+
+      try {
+        const resultText = await generateContentWithGemini(prompt, systemPrompt);
+        document.getElementById('superContentOutput').value = resultText;
+        showStatusMessage('Супер-контент успешно сгенерирован!');
+      } catch (error) {
+        document.getElementById('superContentOutput').value = 'Ошибка генерации. Пожалуйста, попробуйте снова.';
+      } finally {
+        toggleLoader('generateSuperContentBtn', false);
+      }
+    }
+
 
     document.addEventListener('DOMContentLoaded', populateNiches);
   </script>
