@@ -292,7 +292,7 @@
       <button class="btn" onclick="addCustomNicheInput()">Добавить нишу</button>
       <label for="customNicheURL">Или вставьте сайт/соцсеть для анализа:</label>
       <input type="text" id="customNicheURL" placeholder="URL бизнеса или соцсети...">
-      <button class="btn" onclick="confirmCustomNicheURL()">Подтвердить URL/ссылку</button>
+      <button class="btn" onclick="addCustomNicheURL()">Подтвердить URL/ссылку</button>
     </div>
 
     <!-- Новый стратегический блок: Стратегические лид-магниты -->
@@ -642,7 +642,15 @@
         return;
       }
       toggleLoader('generateSegmentsBtn', true);
-      const prompt = `Сгенерируй 7-10 максимально широких и разнообразных сегментов целевой аудитории для следующих ниш: ${selectedNichesArr.join(', ')}. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, интересы, поведение и психографику. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами. Обязательно в начале каждого блока укажи его краткое название, например: "### 1. "Название сегмента" - Краткое описание".`;
+
+      // Улучшенный промпт, который учитывает, что ниша может быть URL
+      const nichePromptList = selectedNichesArr.map(niche => {
+        if (niche.startsWith('http://') || niche.startsWith('https://')) {
+          return `веб-сайт или соцсеть по ссылке "${niche}"`;
+        }
+        return `ниша "${niche}"`;
+      });
+      const prompt = `Сгенерируй 7-10 максимально широких и разнообразных сегментов целевой аудитории для: ${nichePromptList.join(', ')}. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, интересы, поведение и психографику. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами. Обязательно в начале каждого блока укажи его краткое название, например: "### 1. "Название сегмента" - Краткое описание".`;
       const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
 
       try {
@@ -653,9 +661,9 @@
           const div = document.createElement('div');
           div.className = 'generated-segment';
           div.textContent = seg.trim();
+          const match = seg.trim().match(/^[^"]+"([^"]+)"/);
+          const shortName = match ? match[1] : `Сегмент ${segmentsList.children.length}`;
           div.onclick = () => {
-            const match = seg.trim().match(/^[^"]+"([^"]+)"/);
-            const shortName = match ? match[1] : `Сегмент ${segmentsList.children.length}`;
             addSegmentToSelected(div.textContent.trim(), div);
           };
           segmentsList.appendChild(div);
@@ -688,7 +696,6 @@
           const div = document.createElement('div');
           div.className = 'generated-pain';
           div.textContent = pain.trim();
-          // Теперь передаем в функцию addPainToSelected полный текст боли
           div.onclick = () => {
             addPainToSelected(div.textContent.trim(), div);
           };
@@ -727,7 +734,7 @@
         return;
       }
       const selBtn = document.createElement('button');
-      selBtn.textContent = seg;
+      selBtn.textContent = seg.substring(0, 30) + '...';
       selBtn.className = 'selected-item-btn';
       selBtn.onclick = () => {
           selectedSegments.removeChild(selBtn);
@@ -815,10 +822,11 @@
         if (index > -1) selectedNichesArr.splice(index, 1);
       };
       selectedNichesDom.appendChild(btn);
+      selectedNichesArr.push(val);
       input.value = '';
     }
 
-    function confirmCustomNicheURL() {
+    function addCustomNicheURL() {
       const url = document.getElementById('customNicheURL').value.trim();
       if (!url) return;
       if (selectedNichesArr.includes(url)) {
@@ -834,6 +842,7 @@
         if (index > -1) selectedNichesArr.splice(index, 1);
       };
       selectedNichesDom.appendChild(btn);
+      selectedNichesArr.push(url);
       document.getElementById('customNicheURL').value = '';
     }
 
