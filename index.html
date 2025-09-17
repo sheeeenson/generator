@@ -686,43 +686,72 @@
         return;
       }
       toggleLoader('generateSegmentsBtn', true);
+      segmentsList.innerHTML = ''; // Clear existing segments
 
-      // Улучшенный промпт, который учитывает, что ниша может быть URL
       const nichePromptList = selectedNichesArr.map(niche => {
         if (niche.startsWith('http://') || niche.startsWith('https://')) {
           return `веб-сайт или соцсеть по ссылке "${niche}"`;
         }
         return `ниша "${niche}"`;
       });
-      const prompt = `Сгенерируй 7-10 максимально широких и разнообразных сегментов целевой аудитории для: ${nichePromptList.join(', ')}. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, интересы, поведение и психографику. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами. Обязательно в начале каждого блока укажи его краткое название, например: "### 1. "Название сегмента" - Краткое описание".`;
+      const nicheText = nichePromptList.join(', ');
+
       const systemPrompt = 'Ты - маркетолог-аналитик, который создает детальные портреты ЦА.';
 
+      // Prompt for Basic Segments
+      const basicPrompt = `Сгенерируй 10 максимально широких и разнообразных, базовых сегментов целевой аудитории для: ${nicheText}. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, интересы, поведение и психографику. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами. Обязательно в начале каждого блока укажи его краткое название, например: "### 1. "Название сегмента" - Краткое описание".`;
+
+      // Prompt for Exotic Segments
+      const exoticPrompt = `Сгенерируй 5 максимально необычных, экзотических сегментов целевой аудитории для: ${nicheText}. Эти сегменты должны быть креативными и нетипичными. Для каждого сегмента предоставь единый, связный абзац текста, который включает в себя все характеристики: демографию, интересы, поведение и психографику. Каждое описание сегмента должно быть одним цельным блоком текста, без переносов строк между пунктами. Обязательно в начале каждого блока укажи его краткое название, например: "### 1. "Название сегмента" - Краткое описание".`;
+
       try {
-        const resultText = await generateContentWithGemini(prompt, systemPrompt);
-        const segments = resultText.split('###').filter(s => s.trim() !== '');
-        segmentsList.innerHTML = '';
-        segments.forEach(seg => {
-          const div = document.createElement('div');
-          div.className = 'generated-segment';
-          div.textContent = seg.trim();
-          const match = seg.trim().match(/^[^"]+"([^"]+)"/);
-          const shortName = match ? match[1] : `Сегмент ${segmentsList.children.length}`;
-          div.onclick = () => {
-            addSegmentToSelected(div.textContent.trim(), div);
-          };
-          segmentsList.appendChild(div);
+        const [basicResult, exoticResult] = await Promise.all([
+            generateContentWithGemini(basicPrompt, systemPrompt),
+            generateContentWithGemini(exoticPrompt, systemPrompt)
+        ]);
+
+        // Process basic segments
+        const basicSegments = basicResult.split('###').filter(s => s.trim() !== '');
+        basicSegments.forEach(seg => {
+            const div = createSegmentElement(seg.trim(), 'Базовый');
+            div.onclick = () => addSegmentToSelected(div.textContent.trim(), div);
+            segmentsList.appendChild(div);
         });
+
+        // Process exotic segments
+        const exoticSegments = exoticResult.split('###').filter(s => s.trim() !== '');
+        exoticSegments.forEach(seg => {
+            const div = createSegmentElement(seg.trim(), 'Экзотический');
+            div.onclick = () => addSegmentToSelected(div.textContent.trim(), div);
+            segmentsList.appendChild(div);
+        });
+
         showStatusMessage('Сегменты успешно сгенерированы!');
-        // Если сегменты сгенерированы, показываем стратегический блок
         if (selectedSegmentsArr.length > 0 && selectedPainsArr.length > 0) {
           document.getElementById('strategicLeadBlock').style.display = 'block';
         }
       } catch (error) {
         console.error("Failed to generate segments:", error);
+        showStatusMessage('Ошибка генерации. Пожалуйста, попробуйте снова.');
       } finally {
         toggleLoader('generateSegmentsBtn', false);
       }
     }
+
+    // New helper function to create the segment div with the type label
+    function createSegmentElement(text, type) {
+        const div = document.createElement('div');
+        div.className = 'generated-segment';
+        const typeLabel = document.createElement('span');
+        typeLabel.textContent = `[${type}] `;
+        typeLabel.style.fontWeight = 'bold';
+        typeLabel.style.color = type === 'Базовый' ? '#333' : '#8B008B';
+        const textNode = document.createTextNode(text);
+        div.appendChild(typeLabel);
+        div.appendChild(textNode);
+        return div;
+    }
+
 
     async function generatePains() {
       if (selectedSegmentsArr.length === 0) {
